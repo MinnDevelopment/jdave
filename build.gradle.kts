@@ -7,7 +7,7 @@ plugins {
 
 group = "club.minnced"
 
-version = "1.0-SNAPSHOT"
+version = "0.0.1"
 
 val artifactName = "${project.name}-${getPlatform()}"
 

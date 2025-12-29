@@ -15,7 +15,7 @@ env:
   VCPKG_DISABLE_METRICS: 1
 
 jobs:
-  build:
+  linux:
     name: Build Linux x64
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y curl make cmake nasm gcc libssl-dev nlohmann-json3-dev doctest-dev
+          sudo apt-get install -y linux-headers-$(uname -r) curl make cmake nasm gcc libssl-dev nlohmann-json3-dev doctest-dev
 
       - name: Bootstrap vcpkg
         run: ./libdave/cpp/vcpkg/bootstrap-vcpkg.sh
@@ -48,5 +48,36 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Linux_x64
+          path: |
+            build/libs/*.jar
+
+  windows:
+    name: Build Windows x64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Bootstrap vcpkg
+        run: libdave/cpp/vcpkg/bootstrap-vcpkg.bat
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Artifacts
+        run: ./gradlew build -Ptarget=x86_64-pc-windows-msvc
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows_x64
           path: |
             build/libs/*.jar

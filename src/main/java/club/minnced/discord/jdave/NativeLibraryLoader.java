@@ -19,7 +19,7 @@ public class NativeLibraryLoader {
         try (InputStream library = NativeLibraryLoader.class.getResourceAsStream(nativeLibrary.resourcePath())) {
             if (library == null) {
                 throw new LibDaveBindingException(
-                        "Could not find resource for current platform. Looked for " + nativeLibrary);
+                        "Could not find resource for current platform. Looked for " + nativeLibrary.resourcePath());
             }
 
             Path tempDirectory = Files.createTempDirectory("jdave");
@@ -69,7 +69,7 @@ public class NativeLibraryLoader {
     private static String normalizeArch(String arch) {
         arch = arch.toLowerCase();
         return switch (arch) {
-            case "x86_64", "amd64" -> "x64";
+            case "x86_64", "amd64" -> "x86-64";
             case "aarch64", "arm64" -> "aarch64";
             case "x86", "i386", "i486", "i586", "i686" -> "x86";
             default -> throw new UnsupportedOperationException("Unsupported arch: " + arch);

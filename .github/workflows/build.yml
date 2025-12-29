@@ -1,0 +1,50 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+env:
+  CMAKE_BUILD_PARALLEL_LEVEL: 3
+  CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/libdave/cpp/vcpkg/scripts/buildsystems/vcpkg.cmake
+  VCPKG_BINARY_SOURCES: files,${{ github.workspace }}/libdave/vcpkg_cache,readwrite
+  VCPKG_DISABLE_METRICS: 1
+
+jobs:
+  build:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y curl make cmake nasm gcc libssl-dev nlohmann-json3-dev doctest-dev
+
+      - name: Bootstrap vcpkg
+        run: ./libdave/cpp/vcpkg/bootstrap-vcpkg.sh
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build Artifacts
+        run: ./gradlew build -Ptarget=x86_64-unknown-linux-gnu
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux_x64
+          path: |
+            build/libs/*.jar

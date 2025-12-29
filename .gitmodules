@@ -2,3 +2,8 @@
 	path = libdave
 	url = git@github.com:MinnDevelopment/libdave.git
 	branch = feature/gradle
+[submodule "JDA"]
+	path = JDA
+	url = git@github.com:discord-jda/JDA
+	branch = feature/dave
+	shallow = true

@@ -1,6 +1,9 @@
 package club.minnced.discord.jdave.interop;
 
+import static club.minnced.discord.jdave.DaveConstants.MLS_NEW_GROUP_EXPECTED_EPOCH;
+
 import club.minnced.discord.jdave.*;
+import club.minnced.discord.jdave.ffi.LibDave;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -8,8 +11,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.dv8tion.jda.api.audio.dave.DaveProtocolCallbacks;
 import net.dv8tion.jda.api.audio.dave.DaveSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JDaveSession implements DaveSession {
+    private static final Logger log = LoggerFactory.getLogger(JDaveSession.class);
+
     private final long selfUserId;
     private final long channelId;
 
@@ -29,7 +36,7 @@ public class JDaveSession implements DaveSession {
 
     @Override
     public int getMaxProtocolVersion() {
-        return session.getProtocolVersion();
+        return LibDave.getMaxSupportedProtocolVersion();
     }
 
     @Override
@@ -96,56 +103,49 @@ public class JDaveSession implements DaveSession {
 
     @Override
     public void onSelectProtocolAck(int protocolVersion) {
-        session.initialize((short) protocolVersion, channelId, Long.toUnsignedString(selfUserId));
+        log.debug("Handle select protocol version {}", protocolVersion);
+        handleDaveProtocolInit(protocolVersion);
     }
 
     @Override
     public void onDaveProtocolPrepareTransition(int transitionId, int protocolVersion) {
-        preparedTransitions.put(transitionId, protocolVersion);
+        log.debug(
+                "Handle dave protocol prepare transition transitionId={} protocolVersion={}",
+                transitionId,
+                protocolVersion);
+        prepareProtocolRatchets(transitionId, protocolVersion);
+        if (transitionId != DaveConstants.INIT_TRANSITION_ID) {
+            callbacks.sendDaveProtocolReadyForTransition(transitionId);
+        }
     }
 
     @Override
     public void onDaveProtocolExecuteTransition(int transitionId) {
-        Integer protocolVersion = preparedTransitions.remove(transitionId);
-        if (protocolVersion == null) {
-            return;
-        }
-
-        int oldVersion = session.getProtocolVersion();
-        if (oldVersion == protocolVersion) {
-            return;
-        }
-
-        if (protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION) {
-            session.reset();
-        } else {
-            encryptor.initialize(Long.toUnsignedString(selfUserId));
-        }
+        log.debug("Handle dave protocol execute transition transitionId={}", transitionId);
+        handleProtocolExecuteTransition(transitionId);
     }
 
     @Override
     public void onDaveProtocolPrepareEpoch(String epoch, int protocolVersion) {
-        if ("1".equals(epoch)) {
-            session.reset();
-            session.setProtocolVersion((short) protocolVersion);
-            encryptor.initialize(Long.toUnsignedString(selfUserId));
-            decryptors.forEach(
-                    (key, value) -> value.updateKeyRatchet(session.getKeyRatchet(Long.toUnsignedString(key))));
-        }
+        log.debug("Handle dave protocol prepare epoch epoch={} protocolVersion={}", epoch, protocolVersion);
+        handlePrepareEpoch(epoch, (short) protocolVersion);
     }
 
     @Override
     public void onDaveProtocolMLSExternalSenderPackage(ByteBuffer externalSenderPackage) {
+        log.debug("Handling external sender package");
         session.setExternalSender(externalSenderPackage);
     }
 
     @Override
     public void onMLSProposals(ByteBuffer proposals) {
+        log.debug("Handling MLS proposals");
         session.processProposals(proposals, getUserIds(), callbacks::sendMLSCommitWelcome);
     }
 
     @Override
     public void onMLSPrepareCommitTransition(int transitionId, ByteBuffer commit) {
+        log.debug("Handling MLS prepare commit transition transitionId={}", transitionId);
         DaveSessionImpl.CommitResult result = session.processCommit(commit);
         switch (result) {
             case DaveSessionImpl.CommitResult.Ignored ignored -> {
@@ -153,9 +153,13 @@ public class JDaveSession implements DaveSession {
             }
             case DaveSessionImpl.CommitResult.Success success -> {
                 if (success.joined()) {
-                    prepareTransition(transitionId);
+                    prepareProtocolRatchets(transitionId, session.getProtocolVersion());
+                    if (transitionId != DaveConstants.INIT_TRANSITION_ID) {
+                        callbacks.sendDaveProtocolReadyForTransition(transitionId);
+                    }
                 } else {
                     sendInvalidCommitWelcome(transitionId);
+                    handleDaveProtocolInit(transitionId);
                 }
             }
         }
@@ -163,12 +167,17 @@ public class JDaveSession implements DaveSession {
 
     @Override
     public void onMLSWelcome(int transitionId, ByteBuffer welcome) {
+        log.debug("Handling MLS welcome transition transitionId={}", transitionId);
         boolean joinedGroup = session.processWelcome(welcome, getUserIds());
 
         if (joinedGroup) {
-            prepareTransition(transitionId);
+            prepareProtocolRatchets(transitionId, session.getProtocolVersion());
+            if (transitionId != DaveConstants.INIT_TRANSITION_ID) {
+                callbacks.sendDaveProtocolReadyForTransition(transitionId);
+            }
         } else {
             sendInvalidCommitWelcome(transitionId);
+            handleDaveProtocolInit(transitionId);
         }
     }
 
@@ -176,7 +185,25 @@ public class JDaveSession implements DaveSession {
         return decryptors.keySet().stream().map(Long::toUnsignedString).toList();
     }
 
-    private void prepareTransition(int transitionId) {
+    private void handleDaveProtocolInit(int protocolVersion) {
+        if (protocolVersion > DaveConstants.INIT_TRANSITION_ID) {
+            handlePrepareEpoch(MLS_NEW_GROUP_EXPECTED_EPOCH, protocolVersion);
+            session.sendMarshalledKeyPackage(callbacks::sendMLSKeyPackage);
+        } else {
+            prepareProtocolRatchets(DaveConstants.INIT_TRANSITION_ID, protocolVersion);
+            handleProtocolExecuteTransition(DaveConstants.INIT_TRANSITION_ID);
+        }
+    }
+
+    private void handlePrepareEpoch(String epoch, int protocolVersion) {
+        if (!MLS_NEW_GROUP_EXPECTED_EPOCH.equals(epoch)) {
+            return;
+        }
+
+        session.initialize((short) protocolVersion, channelId, Long.toUnsignedString(selfUserId));
+    }
+
+    private void prepareProtocolRatchets(int transitionId, int protocolVersion) {
         decryptors.forEach((userId, decryptor) -> {
             if (userId == selfUserId) {
                 return;
@@ -189,18 +216,37 @@ public class JDaveSession implements DaveSession {
         if (transitionId == DaveConstants.INIT_TRANSITION_ID) {
             encryptor.initialize(Long.toUnsignedString(selfUserId));
         } else {
-            Integer preparedProtocolVersion = preparedTransitions.remove(transitionId);
-            session.setProtocolVersion(preparedProtocolVersion.shortValue());
+            preparedTransitions.put(transitionId, protocolVersion);
+        }
+    }
+
+    private void handleProtocolExecuteTransition(int transitionId) {
+        Integer protocolVersion = preparedTransitions.remove(transitionId);
+        if (protocolVersion == null) {
+            return;
         }
 
-        if (transitionId != DaveConstants.INIT_TRANSITION_ID) {
-            preparedTransitions.put(transitionId, (int) session.getProtocolVersion());
-            callbacks.sendDaveProtocolReadyForTransition(transitionId);
+        if (protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION) {
+            session.reset();
         }
+
+        setupKeyRatchetForUser(this.selfUserId, protocolVersion);
     }
 
     private void sendInvalidCommitWelcome(int transitionId) {
         callbacks.sendMLSInvalidCommitWelcome(transitionId);
         session.sendMarshalledKeyPackage(callbacks::sendMLSKeyPackage);
+    }
+
+    private void setupKeyRatchetForUser(long userId, int protocolVersion) {
+        if (protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION) {
+            return;
+        }
+
+        if (userId == selfUserId) {
+            encryptor.initialize(Long.toUnsignedString(userId));
+        } else {
+            decryptors.get(userId).updateKeyRatchet(session.getKeyRatchet(Long.toUnsignedString(userId)));
+        }
     }
 }

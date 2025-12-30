@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.jspecify:jspecify:1.0.0")
     implementation("org.slf4j:slf4j-api:2.0.17")
 
     // TODO: Fix this version on proper release

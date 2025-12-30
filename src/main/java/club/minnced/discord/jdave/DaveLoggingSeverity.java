@@ -1,5 +1,7 @@
 package club.minnced.discord.jdave;
 
+import org.jspecify.annotations.NonNull;
+
 public enum DaveLoggingSeverity {
     UNKNOWN,
     VERBOSE,
@@ -9,6 +11,7 @@ public enum DaveLoggingSeverity {
     NONE,
     ;
 
+    @NonNull
     public static DaveLoggingSeverity fromRaw(int severity) {
         return switch (severity) {
             case 0 -> DaveLoggingSeverity.VERBOSE;

@@ -8,6 +8,7 @@ import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
+import org.jspecify.annotations.NonNull;
 
 public class LibDaveEncryptorBinding {
     static final MethodHandle daveEncryptorCreate;
@@ -75,6 +76,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
+    @NonNull
     public static MemorySegment createEncryptor() {
         try {
             return (MemorySegment) daveEncryptorCreate.invoke();
@@ -83,7 +85,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static void destroyEncryptor(MemorySegment encryptor) {
+    public static void destroyEncryptor(@NonNull MemorySegment encryptor) {
         try {
             daveEncryptorDestroy.invoke(encryptor);
         } catch (Throwable e) {
@@ -91,7 +93,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static void setKeyRatchet(MemorySegment encryptor, MemorySegment keyRatchet) {
+    public static void setKeyRatchet(@NonNull MemorySegment encryptor, @NonNull MemorySegment keyRatchet) {
         try {
             daveEncryptorSetKeyRatchet.invoke(encryptor, keyRatchet);
         } catch (Throwable e) {
@@ -99,7 +101,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static void setPassthroughMode(MemorySegment encryptor, boolean passthroughMode) {
+    public static void setPassthroughMode(@NonNull MemorySegment encryptor, boolean passthroughMode) {
         try {
             daveEncryptorSetPassthroughMode.invoke(encryptor, passthroughMode);
         } catch (Throwable e) {
@@ -107,7 +109,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static short getProtocolVersion(MemorySegment encryptor) {
+    public static short getProtocolVersion(@NonNull MemorySegment encryptor) {
         try {
             return (short) daveEncryptorGetProtocolVersion.invoke(encryptor);
         } catch (Throwable e) {
@@ -115,7 +117,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static long getMaxCiphertextByteSize(MemorySegment encryptor, int mediaType, long frameSize) {
+    public static long getMaxCiphertextByteSize(@NonNull MemorySegment encryptor, int mediaType, long frameSize) {
         try {
             return sizeToLong(daveEncryptorGetMaxCiphertextByteSize.invoke(encryptor, mediaType, toSizeT(frameSize)));
         } catch (Throwable e) {
@@ -124,12 +126,12 @@ public class LibDaveEncryptorBinding {
     }
 
     public static int encrypt(
-            MemorySegment encryptor,
+            @NonNull MemorySegment encryptor,
             int mediaType,
             int ssrc,
-            MemorySegment frame,
-            MemorySegment encryptedFrame,
-            MemorySegment bytesWritten) {
+            @NonNull MemorySegment frame,
+            @NonNull MemorySegment encryptedFrame,
+            @NonNull MemorySegment bytesWritten) {
         try {
             return (int) daveEncryptorEncrypt.invoke(
                     encryptor,
@@ -145,7 +147,7 @@ public class LibDaveEncryptorBinding {
         }
     }
 
-    public static void assignSsrcToCodec(MemorySegment encryptor, int ssrc, int codecType) {
+    public static void assignSsrcToCodec(@NonNull MemorySegment encryptor, int ssrc, int codecType) {
         try {
             daveEncryptorAssignSsrcToCodec.invoke(encryptor, ssrc, codecType);
         } catch (Throwable e) {

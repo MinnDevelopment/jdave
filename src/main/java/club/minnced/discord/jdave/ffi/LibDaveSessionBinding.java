@@ -8,6 +8,7 @@ import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.nio.ByteBuffer;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 
 public class LibDaveSessionBinding {
     static final MethodHandle daveSessionCreate;
@@ -134,7 +135,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static MemorySegment createSession(MemorySegment context, MemorySegment authSessionId) {
+    @NonNull
+    public static MemorySegment createSession(@NonNull MemorySegment context, @NonNull MemorySegment authSessionId) {
         try {
             return (MemorySegment) daveSessionCreate.invoke(context, authSessionId, MemorySegment.NULL);
         } catch (Throwable e) {
@@ -142,7 +144,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void destroySession(MemorySegment session) {
+    public static void destroySession(@NonNull MemorySegment session) {
         try {
             daveSessionDestroy.invoke(session);
         } catch (Throwable e) {
@@ -150,7 +152,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void initializeSession(MemorySegment session, short version, long groupId, MemorySegment selfUserId) {
+    public static void initializeSession(
+            @NonNull MemorySegment session, short version, long groupId, @NonNull MemorySegment selfUserId) {
         try {
             daveSessionInit.invoke(session, version, groupId, selfUserId);
         } catch (Throwable e) {
@@ -158,7 +161,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void resetSession(MemorySegment session) {
+    public static void resetSession(@NonNull MemorySegment session) {
         try {
             daveSessionReset.invoke(session);
         } catch (Throwable e) {
@@ -166,7 +169,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void setProtocolVersion(MemorySegment session, short version) {
+    public static void setProtocolVersion(@NonNull MemorySegment session, short version) {
         try {
             daveSessionSetProtocolVersion.invoke(session, version);
         } catch (Throwable e) {
@@ -174,7 +177,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static short getProtocolVersion(MemorySegment session) {
+    public static short getProtocolVersion(@NonNull MemorySegment session) {
         try {
             return (short) daveSessionGetProtocolVersion.invoke(session);
         } catch (Throwable e) {
@@ -182,7 +185,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static MemorySegment getMarshalledKeyPackage(MemorySegment session) {
+    @NonNull
+    public static MemorySegment getMarshalledKeyPackage(@NonNull MemorySegment session) {
         try (Arena local = Arena.ofConfined()) {
             MemorySegment sizePtr = local.allocate(C_SIZE);
             MemorySegment arrayPtr = local.allocate(ADDRESS.withTargetLayout(ADDRESS));
@@ -195,7 +199,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static MemorySegment getKeyRatchet(MemorySegment session, MemorySegment selfUserId) {
+    @NonNull
+    public static MemorySegment getKeyRatchet(@NonNull MemorySegment session, @NonNull MemorySegment selfUserId) {
         try {
             return (MemorySegment) daveSessionGetKeyRatchet.invoke(session, selfUserId);
         } catch (Throwable e) {
@@ -203,7 +208,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static MemorySegment getLastEpochAuthenticator(MemorySegment session) {
+    @NonNull
+    public static MemorySegment getLastEpochAuthenticator(@NonNull MemorySegment session) {
         try (Arena local = Arena.ofConfined()) {
             MemorySegment sizePtr = local.allocate(C_SIZE);
             MemorySegment arrayPtr = local.allocate(ADDRESS.withTargetLayout(ADDRESS));
@@ -215,7 +221,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void setExternalSender(MemorySegment session, ByteBuffer externalSenderPackage) {
+    public static void setExternalSender(@NonNull MemorySegment session, @NonNull ByteBuffer externalSenderPackage) {
         try {
             daveSessionSetExternalSender.invoke(
                     session, MemorySegment.ofBuffer(externalSenderPackage), externalSenderPackage.remaining());
@@ -225,8 +231,11 @@ public class LibDaveSessionBinding {
     }
 
     // Returns Welcome package
+    @NonNull
     public static MemorySegment processProposals(
-            MemorySegment session, ByteBuffer proposals, List<String> recognizedUserIds) {
+            @NonNull MemorySegment session,
+            @NonNull ByteBuffer proposals,
+            @NonNull List<@NonNull String> recognizedUserIds) {
         try (Arena local = Arena.ofConfined()) {
             MemorySegment welcomeSizePtr = local.allocate(C_SIZE);
             MemorySegment welcomeArrayPtr = local.allocate(ADDRESS.withTargetLayout(ADDRESS));
@@ -247,7 +256,8 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static MemorySegment processCommit(MemorySegment session, ByteBuffer commit) {
+    @NonNull
+    public static MemorySegment processCommit(@NonNull MemorySegment session, @NonNull ByteBuffer commit) {
         try {
             return (MemorySegment) daveSessionProcessCommit.invoke(
                     session, MemorySegment.ofBuffer(commit), toSizeT(commit.remaining()));
@@ -256,7 +266,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static boolean isCommitIgnored(MemorySegment processedCommit) {
+    public static boolean isCommitIgnored(@NonNull MemorySegment processedCommit) {
         try {
             return (boolean) daveCommitResultIsIgnored.invoke(processedCommit);
         } catch (Throwable e) {
@@ -264,7 +274,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static boolean isCommitFailure(MemorySegment processedCommit) {
+    public static boolean isCommitFailure(@NonNull MemorySegment processedCommit) {
         try {
             return (boolean) daveCommitResultIsFailed.invoke(processedCommit);
         } catch (Throwable e) {
@@ -272,11 +282,11 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static boolean isCommitJoinedGroup(MemorySegment processedCommit) {
+    public static boolean isCommitJoinedGroup(@NonNull MemorySegment processedCommit) {
         return !isCommitIgnored(processedCommit) && !isCommitFailure(processedCommit);
     }
 
-    public static void destroyCommitResult(MemorySegment processedCommit) {
+    public static void destroyCommitResult(@NonNull MemorySegment processedCommit) {
         try {
             daveCommitResultDestroy.invoke(processedCommit);
         } catch (Throwable e) {
@@ -285,8 +295,11 @@ public class LibDaveSessionBinding {
     }
 
     // Returns a "roster" of users / keys or null
+    @NonNull
     public static MemorySegment processWelcome(
-            MemorySegment session, ByteBuffer welcome, List<String> recognizedUserIds) {
+            @NonNull MemorySegment session,
+            @NonNull ByteBuffer welcome,
+            @NonNull List<@NonNull String> recognizedUserIds) {
         try (Arena local = Arena.ofConfined()) {
             MemorySegment recognizedUserIdsArray = allocateStringArray(local, recognizedUserIds);
 
@@ -301,7 +314,7 @@ public class LibDaveSessionBinding {
         }
     }
 
-    public static void destroyWelcomeResult(MemorySegment welcomeResult) {
+    public static void destroyWelcomeResult(@NonNull MemorySegment welcomeResult) {
         try {
             daveWelcomeResultDestroy.invoke(welcomeResult);
         } catch (Throwable e) {
@@ -309,13 +322,16 @@ public class LibDaveSessionBinding {
         }
     }
 
-    private static MemorySegment getByteArrayFromRawParts(MemorySegment arrayPtr, MemorySegment sizePtr) {
+    @NonNull
+    private static MemorySegment getByteArrayFromRawParts(
+            @NonNull MemorySegment arrayPtr, @NonNull MemorySegment sizePtr) {
         long size = readSize(sizePtr);
         AddressLayout arrayLayout = ADDRESS.withTargetLayout(MemoryLayout.sequenceLayout(size, JAVA_BYTE));
         return arrayPtr.get(arrayLayout, 0).asSlice(0, size);
     }
 
-    private static MemorySegment allocateStringArray(Arena arena, List<String> userIds) {
+    @NonNull
+    private static MemorySegment allocateStringArray(@NonNull Arena arena, @NonNull List<@NonNull String> userIds) {
         MemorySegment recognizedUserIdsArray = arena.allocate(MemoryLayout.sequenceLayout(userIds.size(), ADDRESS));
 
         for (int i = 0; i < userIds.size(); i++) {

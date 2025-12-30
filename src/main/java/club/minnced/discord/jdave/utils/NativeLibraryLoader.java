@@ -7,12 +7,15 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.SymbolLookup;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.jspecify.annotations.NonNull;
 
 public class NativeLibraryLoader {
+    @NonNull
     public static NativeLibrary getNativeLibrary() {
         return resolveLibrary("dave");
     }
 
+    @NonNull
     public static Path createTemporaryFile() {
         NativeLibrary nativeLibrary = getNativeLibrary();
 
@@ -36,12 +39,14 @@ public class NativeLibraryLoader {
         }
     }
 
+    @NonNull
     public static SymbolLookup getSymbolLookup() {
         Path tempFile = createTemporaryFile();
         return SymbolLookup.libraryLookup(tempFile, Arena.global());
     }
 
-    public static NativeLibrary resolveLibrary(String baseName) {
+    @NonNull
+    public static NativeLibrary resolveLibrary(@NonNull String baseName) {
         String os = normalizeOs(System.getProperty("os.name"));
         String arch = normalizeArch(System.getProperty("os.arch"));
 
@@ -52,7 +57,8 @@ public class NativeLibraryLoader {
         return new NativeLibrary(platform, prefix + baseName, extension);
     }
 
-    private static String normalizeOs(String osName) {
+    @NonNull
+    private static String normalizeOs(@NonNull String osName) {
         osName = osName.toLowerCase();
         if (osName.contains("win")) {
             return "windows";
@@ -66,7 +72,8 @@ public class NativeLibraryLoader {
         throw new UnsupportedOperationException("Unsupported OS: " + osName);
     }
 
-    private static String normalizeArch(String arch) {
+    @NonNull
+    private static String normalizeArch(@NonNull String arch) {
         arch = arch.toLowerCase();
         return switch (arch) {
             case "x86_64", "amd64" -> "x86-64";
@@ -76,11 +83,13 @@ public class NativeLibraryLoader {
         };
     }
 
-    private static String libraryPrefix(String os) {
+    @NonNull
+    private static String libraryPrefix(@NonNull String os) {
         return os.equals("windows") ? "" : "lib";
     }
 
-    private static String libraryExtension(String os) {
+    @NonNull
+    private static String libraryExtension(@NonNull String os) {
         return switch (os) {
             case "windows" -> "dll";
             case "macos" -> "dylib";
@@ -89,7 +98,10 @@ public class NativeLibraryLoader {
         };
     }
 
-    public record NativeLibrary(String platform, String libraryName, String extension) {
+    public record NativeLibrary(
+            @NonNull String platform,
+            @NonNull String libraryName,
+            @NonNull String extension) {
         public String resourcePath() {
             return "/natives/" + platform + "/" + libraryName + "." + extension;
         }

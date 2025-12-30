@@ -7,18 +7,20 @@ import club.minnced.discord.jdave.ffi.LibDaveEncryptorBinding;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
+import org.jspecify.annotations.NonNull;
 
 public class DaveEncryptor implements AutoCloseable {
     private final Arena arena;
     private final MemorySegment encryptor;
     private final DaveSessionImpl session;
 
-    private DaveEncryptor(Arena arena, MemorySegment encryptor, DaveSessionImpl session) {
+    private DaveEncryptor(@NonNull Arena arena, @NonNull MemorySegment encryptor, @NonNull DaveSessionImpl session) {
         this.arena = arena;
         this.encryptor = encryptor;
         this.session = session;
     }
 
+    @NonNull
     public static DaveEncryptor create(DaveSessionImpl session) {
         return new DaveEncryptor(Arena.ofConfined(), LibDaveEncryptorBinding.createEncryptor(), session);
     }
@@ -27,7 +29,7 @@ public class DaveEncryptor implements AutoCloseable {
         LibDaveEncryptorBinding.destroyEncryptor(encryptor);
     }
 
-    public void prepareTransition(DaveSessionImpl session, long selfUserId, int protocolVersion) {
+    public void prepareTransition(long selfUserId, int protocolVersion) {
         boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
 
         if (!disabled) {
@@ -42,15 +44,17 @@ public class DaveEncryptor implements AutoCloseable {
         LibDaveEncryptorBinding.setPassthroughMode(encryptor, disabled);
     }
 
-    public long getMaxCiphertextByteSize(DaveMediaType mediaType, long frameSize) {
+    public long getMaxCiphertextByteSize(@NonNull DaveMediaType mediaType, long frameSize) {
         return LibDaveEncryptorBinding.getMaxCiphertextByteSize(encryptor, mediaType.ordinal(), frameSize);
     }
 
-    public void assignSsrcToCodec(DaveCodec codec, int ssrc) {
+    public void assignSsrcToCodec(@NonNull DaveCodec codec, int ssrc) {
         LibDaveEncryptorBinding.assignSsrcToCodec(encryptor, ssrc, codec.ordinal());
     }
 
-    public DaveEncryptorResult encrypt(DaveMediaType mediaType, int ssrc, ByteBuffer input, ByteBuffer output) {
+    @NonNull
+    public DaveEncryptorResult encrypt(
+            @NonNull DaveMediaType mediaType, int ssrc, @NonNull ByteBuffer input, @NonNull ByteBuffer output) {
         try (Arena local = Arena.ofConfined()) {
             MemorySegment bytesWrittenPtr = local.allocate(C_SIZE);
 
@@ -79,13 +83,14 @@ public class DaveEncryptor implements AutoCloseable {
         this.arena.close();
     }
 
-    public record DaveEncryptorResult(DaveEncryptResultType type, long bytesWritten) {}
+    public record DaveEncryptorResult(@NonNull DaveEncryptResultType type, long bytesWritten) {}
 
     public enum DaveEncryptResultType {
         SUCCESS,
         FAILURE,
         ;
 
+        @NonNull
         public static DaveEncryptResultType fromRaw(int result) {
             return switch (result) {
                 case 0 -> SUCCESS;

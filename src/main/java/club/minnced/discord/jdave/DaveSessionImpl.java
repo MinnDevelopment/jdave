@@ -8,17 +8,20 @@ import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Consumer;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class DaveSessionImpl implements AutoCloseable {
     private final Arena arena;
     private final MemorySegment session;
 
-    private DaveSessionImpl(Arena arena, MemorySegment session) {
+    private DaveSessionImpl(@NonNull Arena arena, @NonNull MemorySegment session) {
         this.arena = arena;
         this.session = session;
     }
 
-    public static DaveSessionImpl create(String authSessionId) {
+    @NonNull
+    public static DaveSessionImpl create(@Nullable String authSessionId) {
         Arena arena = Arena.ofConfined();
         try (Arena local = Arena.ofConfined()) {
             MemorySegment authSessionIdSegment =
@@ -35,7 +38,7 @@ public class DaveSessionImpl implements AutoCloseable {
         LibDaveSessionBinding.destroySession(this.session);
     }
 
-    public void initialize(short version, long groupId, String selfUserId) {
+    public void initialize(short version, long groupId, @NonNull String selfUserId) {
         try (Arena local = Arena.ofConfined()) {
             LibDaveSessionBinding.initializeSession(this.session, version, groupId, local.allocateFrom(selfUserId));
         }
@@ -53,18 +56,20 @@ public class DaveSessionImpl implements AutoCloseable {
         return LibDaveSessionBinding.getProtocolVersion(this.session);
     }
 
-    public MemorySegment getKeyRatchet(String selfUserId) {
+    public MemorySegment getKeyRatchet(@NonNull String selfUserId) {
         try (Arena local = Arena.ofConfined()) {
             return LibDaveSessionBinding.getKeyRatchet(this.session, local.allocateFrom(selfUserId));
         }
     }
 
-    public void setExternalSender(ByteBuffer externalSender) {
+    public void setExternalSender(@NonNull ByteBuffer externalSender) {
         LibDaveSessionBinding.setExternalSender(this.session, externalSender);
     }
 
     public void processProposals(
-            ByteBuffer proposals, List<String> userIds, Consumer<ByteBuffer> sendMLSCommitWelcome) {
+            @NonNull ByteBuffer proposals,
+            @NonNull List<String> userIds,
+            @NonNull Consumer<@NonNull ByteBuffer> sendMLSCommitWelcome) {
         MemorySegment welcome = LibDaveSessionBinding.processProposals(session, proposals, userIds);
         try {
             if (!NativeUtils.isNull(welcome)) {
@@ -78,7 +83,7 @@ public class DaveSessionImpl implements AutoCloseable {
     }
 
     // Returns whether we joined the group or not
-    public boolean processWelcome(ByteBuffer welcome, List<String> userIds) {
+    public boolean processWelcome(@NonNull ByteBuffer welcome, @NonNull List<@NonNull String> userIds) {
         MemorySegment roster = LibDaveSessionBinding.processWelcome(session, welcome, userIds);
         try {
             return !NativeUtils.isNull(roster);
@@ -89,7 +94,8 @@ public class DaveSessionImpl implements AutoCloseable {
         }
     }
 
-    public CommitResult processCommit(ByteBuffer commit) {
+    @NonNull
+    public CommitResult processCommit(@NonNull ByteBuffer commit) {
         MemorySegment processedCommit = LibDaveSessionBinding.processCommit(session, commit);
         try {
             boolean isIgnored = LibDaveSessionBinding.isCommitIgnored(processedCommit);
@@ -103,7 +109,7 @@ public class DaveSessionImpl implements AutoCloseable {
         }
     }
 
-    public void sendMarshalledKeyPackage(Consumer<ByteBuffer> sendPackage) {
+    public void sendMarshalledKeyPackage(@NonNull Consumer<@NonNull ByteBuffer> sendPackage) {
         MemorySegment array = LibDaveSessionBinding.getMarshalledKeyPackage(session);
         try {
             sendPackage.accept(array.asByteBuffer());

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.LongStream;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +26,15 @@ public class DaveSessionManager implements AutoCloseable {
     private final Map<Long, DaveDecryptor> decryptors = new ConcurrentHashMap<>();
     private final Map<Integer, Integer> preparedTransitions = new ConcurrentHashMap<>();
 
-    private DaveSessionManager(long selfUserId, long channelId, DaveSessionManagerCallbacks callbacks) {
+    private DaveSessionManager(long selfUserId, long channelId, @NonNull DaveSessionManagerCallbacks callbacks) {
         this(selfUserId, channelId, callbacks, DaveSessionImpl.create(null));
     }
 
     private DaveSessionManager(
-            long selfUserId, long channelId, DaveSessionManagerCallbacks callbacks, DaveSessionImpl session) {
+            long selfUserId,
+            long channelId,
+            @NonNull DaveSessionManagerCallbacks callbacks,
+            @NonNull DaveSessionImpl session) {
         this.selfUserId = selfUserId;
         this.channelId = channelId;
         this.callbacks = callbacks;
@@ -37,12 +42,18 @@ public class DaveSessionManager implements AutoCloseable {
         this.encryptor = DaveEncryptor.create(session);
     }
 
-    public static DaveSessionManager create(long selfUserId, long channelId, DaveSessionManagerCallbacks callbacks) {
+    @NonNull
+    public static DaveSessionManager create(
+            long selfUserId, long channelId, @NonNull DaveSessionManagerCallbacks callbacks) {
         return new DaveSessionManager(selfUserId, channelId, callbacks);
     }
 
+    @NonNull
     public static DaveSessionManager create(
-            long selfUserId, long channelId, DaveSessionManagerCallbacks callbacks, String authSessionId) {
+            long selfUserId,
+            long channelId,
+            @NonNull DaveSessionManagerCallbacks callbacks,
+            @Nullable String authSessionId) {
         return new DaveSessionManager(selfUserId, channelId, callbacks, DaveSessionImpl.create(authSessionId));
     }
 
@@ -58,15 +69,15 @@ public class DaveSessionManager implements AutoCloseable {
         return LibDave.getMaxSupportedProtocolVersion();
     }
 
-    public void assignSsrcToCodec(DaveCodec codec, int ssrc) {
+    public void assignSsrcToCodec(@NonNull DaveCodec codec, int ssrc) {
         encryptor.assignSsrcToCodec(codec, ssrc);
     }
 
-    public int getMaxEncryptedFrameSize(DaveMediaType type, int frameSize) {
+    public int getMaxEncryptedFrameSize(@NonNull DaveMediaType type, int frameSize) {
         return (int) encryptor.getMaxCiphertextByteSize(type, frameSize);
     }
 
-    public int getMaxDecryptedFrameSize(DaveMediaType type, long userId, int frameSize) {
+    public int getMaxDecryptedFrameSize(@NonNull DaveMediaType type, long userId, int frameSize) {
         DaveDecryptor decryptor = this.decryptors.get(userId);
         if (decryptor == null) {
             return frameSize;
@@ -75,11 +86,13 @@ public class DaveSessionManager implements AutoCloseable {
         return (int) decryptor.getMaxPlaintextByteSize(type, frameSize);
     }
 
-    public void encrypt(DaveMediaType type, int ssrc, ByteBuffer audio, ByteBuffer encrypted) {
+    public void encrypt(
+            @NonNull DaveMediaType type, int ssrc, @NonNull ByteBuffer audio, @NonNull ByteBuffer encrypted) {
         encryptor.encrypt(type, ssrc, audio, encrypted);
     }
 
-    public void decrypt(DaveMediaType type, long userId, ByteBuffer encrypted, ByteBuffer decrypted) {
+    public void decrypt(
+            @NonNull DaveMediaType type, long userId, @NonNull ByteBuffer encrypted, @NonNull ByteBuffer decrypted) {
         DaveDecryptor decryptor = decryptors.get(userId);
 
         if (decryptor != null) {
@@ -126,22 +139,22 @@ public class DaveSessionManager implements AutoCloseable {
         executeProtocolTransition(transitionId);
     }
 
-    public void onDaveProtocolPrepareEpoch(String epoch, int protocolVersion) {
+    public void onDaveProtocolPrepareEpoch(@NonNull String epoch, int protocolVersion) {
         log.debug("Handle dave protocol prepare epoch epoch={} protocolVersion={}", epoch, protocolVersion);
         handlePrepareEpoch(epoch, (short) protocolVersion);
     }
 
-    public void onDaveProtocolMLSExternalSenderPackage(ByteBuffer externalSenderPackage) {
+    public void onDaveProtocolMLSExternalSenderPackage(@NonNull ByteBuffer externalSenderPackage) {
         log.debug("Handling external sender package");
         session.setExternalSender(externalSenderPackage);
     }
 
-    public void onMLSProposals(ByteBuffer proposals) {
+    public void onMLSProposals(@NonNull ByteBuffer proposals) {
         log.debug("Handling MLS proposals");
         session.processProposals(proposals, getUserIds(), callbacks::sendMLSCommitWelcome);
     }
 
-    public void onMLSPrepareCommitTransition(int transitionId, ByteBuffer commit) {
+    public void onMLSPrepareCommitTransition(int transitionId, @NonNull ByteBuffer commit) {
         log.debug("Handling MLS prepare commit transition transitionId={}", transitionId);
         DaveSessionImpl.CommitResult result = session.processCommit(commit);
         switch (result) {
@@ -162,7 +175,7 @@ public class DaveSessionManager implements AutoCloseable {
         }
     }
 
-    public void onMLSWelcome(int transitionId, ByteBuffer welcome) {
+    public void onMLSWelcome(int transitionId, @NonNull ByteBuffer welcome) {
         log.debug("Handling MLS welcome transition transitionId={}", transitionId);
         boolean joinedGroup = session.processWelcome(welcome, getUserIds());
 
@@ -177,7 +190,8 @@ public class DaveSessionManager implements AutoCloseable {
         }
     }
 
-    private List<String> getUserIds() {
+    @NonNull
+    private List<@NonNull String> getUserIds() {
         return LongStream.concat(
                         LongStream.of(selfUserId), decryptors.keySet().stream().mapToLong(id -> id))
                 .mapToObj(Long::toUnsignedString)
@@ -195,7 +209,7 @@ public class DaveSessionManager implements AutoCloseable {
         }
     }
 
-    private void handlePrepareEpoch(String epoch, int protocolVersion) {
+    private void handlePrepareEpoch(@NonNull String epoch, int protocolVersion) {
         if (!MLS_NEW_GROUP_EXPECTED_EPOCH.equals(epoch)) {
             return;
         }
@@ -214,7 +228,7 @@ public class DaveSessionManager implements AutoCloseable {
         });
 
         if (transitionId == DaveConstants.INIT_TRANSITION_ID) {
-            encryptor.prepareTransition(session, selfUserId, protocolVersion);
+            encryptor.prepareTransition(selfUserId, protocolVersion);
         } else {
             preparedTransitions.put(transitionId, protocolVersion);
         }

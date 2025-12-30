@@ -8,6 +8,7 @@ import club.minnced.discord.jdave.DaveMediaType;
 import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
+import org.jspecify.annotations.NonNull;
 
 public class LibDaveDecryptorBinding {
 
@@ -65,6 +66,7 @@ public class LibDaveDecryptorBinding {
         }
     }
 
+    @NonNull
     public static MemorySegment createDecryptor() {
         try {
             return (MemorySegment) daveDecryptorCreate.invoke();
@@ -73,7 +75,7 @@ public class LibDaveDecryptorBinding {
         }
     }
 
-    public static void destroyDecryptor(MemorySegment decryptor) {
+    public static void destroyDecryptor(@NonNull MemorySegment decryptor) {
         try {
             daveDecryptorDestroy.invoke(decryptor);
         } catch (Throwable e) {
@@ -82,7 +84,7 @@ public class LibDaveDecryptorBinding {
     }
 
     public static long getMaxPlaintextByteSize(
-            MemorySegment decryptor, DaveMediaType mediaType, long encryptedFrameSize) {
+            @NonNull MemorySegment decryptor, @NonNull DaveMediaType mediaType, long encryptedFrameSize) {
         try {
             return sizeToLong(daveDecryptorGetMaxPlaintextByteSize.invoke(
                     decryptor, mediaType.ordinal(), toSizeT(encryptedFrameSize)));
@@ -92,11 +94,11 @@ public class LibDaveDecryptorBinding {
     }
 
     public static int decrypt(
-            MemorySegment decryptor,
-            DaveMediaType mediaType,
-            MemorySegment encryptedFrame,
-            MemorySegment decryptedFrame,
-            MemorySegment bytesWritten) {
+            @NonNull MemorySegment decryptor,
+            @NonNull DaveMediaType mediaType,
+            @NonNull MemorySegment encryptedFrame,
+            @NonNull MemorySegment decryptedFrame,
+            @NonNull MemorySegment bytesWritten) {
         try {
             return (int) daveDecryptorDecrypt.invoke(
                     decryptor,
@@ -111,7 +113,7 @@ public class LibDaveDecryptorBinding {
         }
     }
 
-    public static void transitionToKeyRatchet(MemorySegment decryptor, MemorySegment keyRatchet) {
+    public static void transitionToKeyRatchet(@NonNull MemorySegment decryptor, @NonNull MemorySegment keyRatchet) {
         try {
             daveDecryptorTransitionToKeyRatchet.invoke(decryptor, keyRatchet);
         } catch (Throwable e) {
@@ -119,7 +121,7 @@ public class LibDaveDecryptorBinding {
         }
     }
 
-    public static void transitionToPassthroughMode(MemorySegment decryptor, boolean passthroughMode) {
+    public static void transitionToPassthroughMode(@NonNull MemorySegment decryptor, boolean passthroughMode) {
         try {
             daveDecryptorTransitionToPassthroughMode.invoke(decryptor, passthroughMode);
         } catch (Throwable e) {

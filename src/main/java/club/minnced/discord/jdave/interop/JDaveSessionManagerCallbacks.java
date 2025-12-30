@@ -3,16 +3,17 @@ package club.minnced.discord.jdave.interop;
 import club.minnced.discord.jdave.manager.DaveSessionManagerCallbacks;
 import java.nio.ByteBuffer;
 import net.dv8tion.jda.api.audio.dave.DaveProtocolCallbacks;
+import org.jspecify.annotations.NonNull;
 
 public class JDaveSessionManagerCallbacks implements DaveSessionManagerCallbacks {
     private final DaveProtocolCallbacks delegate;
 
-    public JDaveSessionManagerCallbacks(DaveProtocolCallbacks delegate) {
+    public JDaveSessionManagerCallbacks(@NonNull DaveProtocolCallbacks delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public void sendMLSKeyPackage(ByteBuffer mlsKeyPackage) {
+    public void sendMLSKeyPackage(@NonNull ByteBuffer mlsKeyPackage) {
         this.delegate.sendMLSKeyPackage(mlsKeyPackage);
     }
 
@@ -22,7 +23,7 @@ public class JDaveSessionManagerCallbacks implements DaveSessionManagerCallbacks
     }
 
     @Override
-    public void sendMLSCommitWelcome(ByteBuffer commitWelcomeMessage) {
+    public void sendMLSCommitWelcome(@NonNull ByteBuffer commitWelcomeMessage) {
         this.delegate.sendMLSCommitWelcome(commitWelcomeMessage);
     }
 

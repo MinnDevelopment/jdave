@@ -8,6 +8,7 @@ import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
@@ -67,7 +68,7 @@ public class LibDave {
         });
     }
 
-    public static void free(MemorySegment segment) {
+    public static void free(@NonNull MemorySegment segment) {
         try {
             free.invoke(segment);
         } catch (Throwable e) {
@@ -75,7 +76,7 @@ public class LibDave {
         }
     }
 
-    public static long readSize(MemorySegment segment) {
+    public static long readSize(@NonNull MemorySegment segment) {
         if (C_SIZE.byteSize() == 4) {
             return segment.get(JAVA_INT, 0);
         } else {
@@ -83,16 +84,8 @@ public class LibDave {
         }
     }
 
-    static long sizeToLong(Object size) {
+    static long sizeToLong(@NonNull Object size) {
         return ((Number) size).longValue();
-    }
-
-    static Object longToSize(long size) {
-        if (C_SIZE.byteSize() == 4) {
-            return (int) size;
-        } else {
-            return size;
-        }
     }
 
     public static short getMaxSupportedProtocolVersion() {
@@ -103,7 +96,7 @@ public class LibDave {
         }
     }
 
-    public static void setLogSinkCallback(Arena arena, LogSinkCallback logSinkCallback) {
+    public static void setLogSinkCallback(@NonNull Arena arena, @NonNull LogSinkCallback logSinkCallback) {
         LogSinkCallbackMapper upcallMapper = new LogSinkCallbackMapper(logSinkCallback);
 
         MemorySegment upcall = LINKER.upcallStub(
@@ -122,7 +115,7 @@ public class LibDave {
     //                                    int line,
     //                                    const char* message);
     public interface LogSinkCallback {
-        void onLogSink(DaveLoggingSeverity severity, String file, int line, String message);
+        void onLogSink(@NonNull DaveLoggingSeverity severity, @NonNull String file, int line, @NonNull String message);
     }
 
     private static class LogSinkCallbackMapper {
@@ -131,11 +124,11 @@ public class LibDave {
 
         private final LogSinkCallback logSinkCallback;
 
-        LogSinkCallbackMapper(LogSinkCallback logSinkCallback) {
+        LogSinkCallbackMapper(@NonNull LogSinkCallback logSinkCallback) {
             this.logSinkCallback = logSinkCallback;
         }
 
-        public void onCallback(int severity, MemorySegment file, int line, MemorySegment message) {
+        public void onCallback(int severity, @NonNull MemorySegment file, int line, @NonNull MemorySegment message) {
             DaveLoggingSeverity severityEnum =
                     switch (severity) {
                         case 0 -> DaveLoggingSeverity.VERBOSE;
@@ -150,6 +143,7 @@ public class LibDave {
                     severityEnum, NativeUtils.asJavaString(file), line, NativeUtils.asJavaString(message));
         }
 
+        @NonNull
         MethodHandle getMethodHandle() {
             try {
                 return MethodHandles.lookup().bind(this, "onCallback", TYPE);

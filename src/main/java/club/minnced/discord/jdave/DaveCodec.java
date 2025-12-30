@@ -1,5 +1,7 @@
 package club.minnced.discord.jdave;
 
+import org.jspecify.annotations.NonNull;
+
 public enum DaveCodec {
     UNKNOWN,
     OPUS,
@@ -10,6 +12,7 @@ public enum DaveCodec {
     AV1,
     ;
 
+    @NonNull
     public static DaveCodec fromRaw(int codec) {
         return switch (codec) {
             case 1 -> OPUS;

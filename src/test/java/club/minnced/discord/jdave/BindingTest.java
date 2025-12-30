@@ -47,7 +47,7 @@ class BindingTest {
             session.sendMarshalledKeyPackage(session::setExternalSender);
 
             try (DaveEncryptor encryptor = DaveEncryptor.create(session)) {
-                encryptor.prepareTransition(session, selfUserId, 1);
+                encryptor.prepareTransition(selfUserId, 1);
                 encryptor.processTransition(1);
 
                 int ssrc = random.nextInt();
@@ -78,7 +78,7 @@ class BindingTest {
 
         try (DaveSessionImpl session = DaveSessionImpl.create(null)) {
             try (DaveEncryptor encryptor = DaveEncryptor.create(session)) {
-                encryptor.prepareTransition(session, selfUserId, DaveConstants.DISABLED_PROTOCOL_VERSION);
+                encryptor.prepareTransition(selfUserId, DaveConstants.DISABLED_PROTOCOL_VERSION);
                 encryptor.processTransition(DaveConstants.DISABLED_PROTOCOL_VERSION);
 
                 int ssrc = random.nextInt();

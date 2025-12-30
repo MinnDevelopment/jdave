@@ -5,11 +5,12 @@ import club.minnced.discord.jdave.manager.DaveSessionManager;
 import java.nio.ByteBuffer;
 import net.dv8tion.jda.api.audio.dave.DaveProtocolCallbacks;
 import net.dv8tion.jda.api.audio.dave.DaveSession;
+import org.jspecify.annotations.NonNull;
 
 public class JDaveSession implements DaveSession {
     private final DaveSessionManager manager;
 
-    public JDaveSession(long selfUserId, long channelId, DaveProtocolCallbacks callbacks) {
+    public JDaveSession(long selfUserId, long channelId, @NonNull DaveProtocolCallbacks callbacks) {
         this.manager = DaveSessionManager.create(selfUserId, channelId, new JDaveSessionManagerCallbacks(callbacks));
     }
 
@@ -19,14 +20,14 @@ public class JDaveSession implements DaveSession {
     }
 
     @Override
-    public void assignSsrcToCodec(Codec codec, int ssrc) {
+    public void assignSsrcToCodec(@NonNull Codec codec, int ssrc) {
         if (codec == Codec.OPUS) {
             manager.assignSsrcToCodec(DaveCodec.OPUS, ssrc);
         }
     }
 
     @Override
-    public int getMaxEncryptedFrameSize(MediaType type, int frameSize) {
+    public int getMaxEncryptedFrameSize(@NonNull MediaType type, int frameSize) {
         if (type != MediaType.AUDIO) {
             return frameSize * 2;
         }
@@ -35,7 +36,7 @@ public class JDaveSession implements DaveSession {
     }
 
     @Override
-    public int getMaxDecryptedFrameSize(MediaType type, long userId, int frameSize) {
+    public int getMaxDecryptedFrameSize(@NonNull MediaType type, long userId, int frameSize) {
         if (type != MediaType.AUDIO) {
             return frameSize * 2;
         }
@@ -44,12 +45,12 @@ public class JDaveSession implements DaveSession {
     }
 
     @Override
-    public void encryptOpus(int ssrc, ByteBuffer audio, ByteBuffer encrypted) {
+    public void encryptOpus(int ssrc, @NonNull ByteBuffer audio, @NonNull ByteBuffer encrypted) {
         manager.encrypt(DaveMediaType.AUDIO, ssrc, audio, encrypted);
     }
 
     @Override
-    public void decryptOpus(long userId, ByteBuffer encrypted, ByteBuffer decrypted) {
+    public void decryptOpus(long userId, @NonNull ByteBuffer encrypted, @NonNull ByteBuffer decrypted) {
         manager.decrypt(DaveMediaType.AUDIO, userId, encrypted, decrypted);
     }
 
@@ -87,27 +88,27 @@ public class JDaveSession implements DaveSession {
     }
 
     @Override
-    public void onDaveProtocolPrepareEpoch(String epoch, int protocolVersion) {
+    public void onDaveProtocolPrepareEpoch(@NonNull String epoch, int protocolVersion) {
         manager.onDaveProtocolPrepareEpoch(epoch, protocolVersion);
     }
 
     @Override
-    public void onDaveProtocolMLSExternalSenderPackage(ByteBuffer externalSenderPackage) {
+    public void onDaveProtocolMLSExternalSenderPackage(@NonNull ByteBuffer externalSenderPackage) {
         manager.onDaveProtocolMLSExternalSenderPackage(externalSenderPackage);
     }
 
     @Override
-    public void onMLSProposals(ByteBuffer proposals) {
+    public void onMLSProposals(@NonNull ByteBuffer proposals) {
         manager.onMLSProposals(proposals);
     }
 
     @Override
-    public void onMLSPrepareCommitTransition(int transitionId, ByteBuffer commit) {
+    public void onMLSPrepareCommitTransition(int transitionId, @NonNull ByteBuffer commit) {
         manager.onMLSPrepareCommitTransition(transitionId, commit);
     }
 
     @Override
-    public void onMLSWelcome(int transitionId, ByteBuffer welcome) {
+    public void onMLSWelcome(int transitionId, @NonNull ByteBuffer welcome) {
         manager.onMLSWelcome(transitionId, welcome);
     }
 }

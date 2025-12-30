@@ -1,4 +1,4 @@
-package club.minnced.discord.jdave;
+package club.minnced.discord.jdave.utils;
 
 import club.minnced.discord.jdave.ffi.LibDaveBindingException;
 import java.io.InputStream;

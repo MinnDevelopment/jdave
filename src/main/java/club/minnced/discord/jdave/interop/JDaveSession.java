@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.LongStream;
 import net.dv8tion.jda.api.audio.dave.DaveProtocolCallbacks;
 import net.dv8tion.jda.api.audio.dave.DaveSession;
 import org.slf4j.Logger;
@@ -88,11 +89,13 @@ public class JDaveSession implements DaveSession {
 
     @Override
     public void addUser(long userId) {
+        log.debug("Adding user {}", userId);
         decryptors.put(userId, DaveDecryptor.create());
     }
 
     @Override
     public void removeUser(long userId) {
+        log.debug("Removing user {}", userId);
         DaveDecryptor decryptor = decryptors.remove(userId);
         if (decryptor != null) {
             decryptor.close();
@@ -192,7 +195,10 @@ public class JDaveSession implements DaveSession {
     }
 
     private List<String> getUserIds() {
-        return decryptors.keySet().stream().map(Long::toUnsignedString).toList();
+        return LongStream.concat(
+                        LongStream.of(selfUserId), decryptors.keySet().stream().mapToLong(id -> id))
+                .mapToObj(Long::toUnsignedString)
+                .toList();
     }
 
     private void handleDaveProtocolInit(int protocolVersion) {

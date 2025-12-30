@@ -120,11 +120,11 @@ public class LibDaveSessionBinding {
                     SYMBOL_LOOKUP.find("daveCommitResultDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
 
             // DAVEWelcomeResultHandle daveSessionProcessWelcome(
-            //   DAVESessionHandle session, uint8_t* welcome, size_t length, char** recognizedUserIds, size_t
-            // recognizedUserIdsLength);
+            //   DAVESessionHandle session, uint8_t* welcome, size_t length,
+            //   char** recognizedUserIds, size_t recognizedUserIdsLength);
             daveSessionProcessWelcome = LINKER.downcallHandle(
                     SYMBOL_LOOKUP.find("daveSessionProcessWelcome").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, C_SIZE, ADDRESS, C_SIZE));
+                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, C_SIZE, ADDRESS, C_SIZE));
 
             // void daveWelcomeResultDestroy(DAVEWelcomeResultHandle welcomeResultHandle);
             daveWelcomeResultDestroy = LINKER.downcallHandle(

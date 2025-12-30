@@ -17,8 +17,6 @@ public class DaveEncryptor implements AutoCloseable {
         this.arena = arena;
         this.encryptor = encryptor;
         this.session = session;
-
-        LibDaveEncryptorBinding.setPassthroughMode(encryptor, true);
     }
 
     public static DaveEncryptor create(DaveSessionImpl session) {
@@ -29,13 +27,19 @@ public class DaveEncryptor implements AutoCloseable {
         LibDaveEncryptorBinding.destroyEncryptor(encryptor);
     }
 
-    public void initialize(String selfUserId) {
-        LibDaveEncryptorBinding.setPassthroughMode(encryptor, false);
-        LibDaveEncryptorBinding.setKeyRatchet(encryptor, session.getKeyRatchet(selfUserId));
+    public void prepareTransition(DaveSessionImpl session, long selfUserId, int protocolVersion) {
+        boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
+
+        if (!disabled) {
+            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(selfUserId))) {
+                LibDaveEncryptorBinding.setKeyRatchet(encryptor, keyRatchet.getMemorySegment());
+            }
+        }
     }
 
-    public short getProtocolVersion() {
-        return LibDaveEncryptorBinding.getProtocolVersion(encryptor);
+    public void processTransition(int protocolVersion) {
+        boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
+        LibDaveEncryptorBinding.setPassthroughMode(encryptor, disabled);
     }
 
     public long getMaxCiphertextByteSize(DaveMediaType mediaType, long frameSize) {

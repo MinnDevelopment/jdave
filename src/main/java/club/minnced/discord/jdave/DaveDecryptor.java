@@ -14,8 +14,6 @@ public class DaveDecryptor implements AutoCloseable {
     private DaveDecryptor(Arena arena, MemorySegment decryptor) {
         this.arena = arena;
         this.decryptor = decryptor;
-
-        LibDaveDecryptorBinding.transitionToPassthroughMode(decryptor, true);
     }
 
     public static DaveDecryptor create() {
@@ -26,8 +24,19 @@ public class DaveDecryptor implements AutoCloseable {
         LibDaveDecryptorBinding.destroyDecryptor(decryptor);
     }
 
-    public void updateKeyRatchet(MemorySegment ratchet) {
-        LibDaveDecryptorBinding.transitionToKeyRatchet(decryptor, ratchet == null ? MemorySegment.NULL : ratchet);
+    public void prepareTransition(DaveSessionImpl session, long selfUserId, int protocolVersion) {
+        boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
+        LibDaveDecryptorBinding.transitionToPassthroughMode(decryptor, disabled);
+
+        if (!disabled) {
+            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(selfUserId))) {
+                updateKeyRatchet(keyRatchet);
+            }
+        }
+    }
+
+    private void updateKeyRatchet(DaveKeyRatchet ratchet) {
+        LibDaveDecryptorBinding.transitionToKeyRatchet(decryptor, ratchet.getMemorySegment());
     }
 
     public long getMaxPlaintextByteSize(DaveMediaType mediaType, long frameSize) {

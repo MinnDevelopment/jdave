@@ -197,7 +197,7 @@ public class JDaveSession implements DaveSession {
 
     private void handleDaveProtocolInit(int protocolVersion) {
         log.debug("Initializing dave protocol session for protocol version {}", protocolVersion);
-        if (protocolVersion > DaveConstants.INIT_TRANSITION_ID) {
+        if (protocolVersion > DaveConstants.DISABLED_PROTOCOL_VERSION) {
             handlePrepareEpoch(MLS_NEW_GROUP_EXPECTED_EPOCH, protocolVersion);
             session.sendMarshalledKeyPackage(callbacks::sendMLSKeyPackage);
         } else {

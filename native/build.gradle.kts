@@ -7,10 +7,10 @@ publishingEnvironment { moduleName = "jdave-native-${getPlatform()}" }
 dependencies {
     api(project(":api"))
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform(libs.junit.bom))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("ch.qos.logback:logback-classic:1.5.23")
+    testImplementation(libs.logback)
 }
 
 val nativeResourceRoot = "resources/libdave"

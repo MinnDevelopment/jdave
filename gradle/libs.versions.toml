@@ -1,9 +1,11 @@
 [libraries]
 jda = "net.dv8tion:JDA:6.2.1"
+jreleaser = "org.jreleaser:jreleaser-gradle-plugin:1.22.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
+junit-bom = "org.junit:junit-bom:5.10.0"
+logback = "ch.qos.logback:logback-classic:1.5.23"
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"
 spotless = "com.diffplug.spotless:spotless-plugin-gradle:8.1.0"
-jreleaser = "org.jreleaser:jreleaser-gradle-plugin:1.22.0"
 
 [plugins]
 version-catalog-update = "nl.littlerobots.version-catalog-update:1.0.1"

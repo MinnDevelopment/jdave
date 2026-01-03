@@ -26,6 +26,12 @@ configure<JavaPluginExtension> {
     }
 }
 
+tasks.withType<Javadoc>().configureEach {
+    (options as? StandardJavadocDocletOptions)?.apply {
+        addStringOption("Xdoclint:-missing", "-quiet")
+    }
+}
+
 val stagingDirectory: Directory get() = layout.buildDirectory.dir("staging-deploy").get()
 
 configure<PublishingExtension> {
@@ -40,9 +46,6 @@ configure<PublishingExtension> {
 
             groupId = group.toString()
             version = version.toString()
-
-            artifact(tasks.named("javadocJar"))
-            artifact(tasks.named("sourcesJar"))
 
             pom.apply {
                 packaging = "jar"

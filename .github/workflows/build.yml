@@ -49,4 +49,5 @@ jobs:
         with:
           name: Linux_x64
           path: |
-            {native,api}/build/libs/*.jar
+            api/build/libs/*.jar
+            native/build/libs/*.jar

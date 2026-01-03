@@ -1,68 +1,42 @@
-import jdave.gradle.getPlatform
-
 plugins {
-    `java-library`
-    id("com.diffplug.spotless") version "8.1.0"
+    java
+
+    alias(libs.plugins.version.catalog.update)
 }
 
 group = "club.minnced"
-
 version = "0.0.1"
 
-val artifactName = "${project.name}-${getPlatform()}"
-
-base { archivesName.set(artifactName) }
-
-repositories {
-    mavenLocal()
-    mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
 }
 
-dependencies {
-    compileOnly("org.jspecify:jspecify:1.0.0")
-    implementation("org.slf4j:slf4j-api:2.0.17")
+subprojects {
+    apply(plugin = "java-library")
+    apply(plugin = "formatting")
 
-    // TODO: Fix this version on proper release
-    compileOnly("net.dv8tion:JDA:6.3.0")
+    group = rootProject.group
+    version = rootProject.version
 
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("ch.qos.logback:logback-classic:1.5.23")
-}
-
-val nativeResourceRoot = "resources/libdave"
-
-val assembleNatives by
-    tasks.registering(Copy::class) {
-        dependsOn(gradle.includedBuild("libdave").task(":cpp:cmakeAssemble"))
-
-        from(layout.projectDirectory.dir("libdave/cpp/build/libs"))
-        into(layout.buildDirectory.dir("$nativeResourceRoot/natives/${getPlatform()}"))
+    repositories {
+        mavenLocal()
+        mavenCentral()
     }
 
-tasks.processResources {
-    dependsOn(assembleNatives)
-    from(layout.buildDirectory.dir(nativeResourceRoot))
-}
+    configure<JavaPluginExtension> {
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
 
-tasks.test {
-    useJUnitPlatform()
+        withJavadocJar()
+        withSourcesJar()
+    }
 
-    jvmArgs = listOf("--enable-native-access=ALL-UNNAMED")
+    tasks.withType<JavaCompile>().configureEach {
+        options.encoding = "UTF-8"
+        options.release = 25
 
-    testLogging { events("passed", "skipped", "failed") }
-
-    reports { html.required = true }
-}
-
-spotless {
-    kotlinGradle { ktfmt().kotlinlangStyle() }
-
-    java {
-        palantirJavaFormat()
-
-        removeUnusedImports()
-        trimTrailingWhitespace()
+        options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-options", "-Xlint:-restricted"))
     }
 }

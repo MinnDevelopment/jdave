@@ -7,3 +7,8 @@ repositories {
     mavenCentral()
     gradlePluginPortal()
 }
+
+dependencies {
+    implementation(libs.spotless)
+    implementation(libs.jreleaser)
+}

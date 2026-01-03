@@ -1,8 +1,8 @@
 rootProject.name = "jdave"
 
-includeBuild("libdave")
+includeBuild("native/libdave")
 
-includeBuild("JDA") {
+includeBuild("api/JDA") {
     dependencySubstitution { substitute(module("net.dv8tion:JDA")).using(project(":")) }
 }
 

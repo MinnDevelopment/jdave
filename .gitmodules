@@ -1,9 +1,9 @@
 [submodule "libdave"]
-	path = libdave
+	path = native/libdave
 	url = git@github.com:MinnDevelopment/libdave.git
 	branch = feature/gradle
 [submodule "JDA"]
-	path = JDA
+	path = api/JDA
 	url = git@github.com:discord-jda/JDA
 	branch = feature/dave
 	shallow = true

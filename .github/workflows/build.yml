@@ -19,30 +19,7 @@ jobs:
     name: Build Linux x64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y curl make cmake nasm gcc libssl-dev nlohmann-json3-dev doctest-dev
-
-      - name: Bootstrap vcpkg
-        run: native/libdave/cpp/vcpkg/bootstrap-vcpkg.sh
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build Artifacts
-        run: ./gradlew build -Ptarget=x86_64-unknown-linux-gnu
+      - uses: ./.github/actions/build_linux
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

@@ -61,7 +61,7 @@ public class NativeLibraryLoader {
     private static String normalizeOs(@NonNull String osName) {
         osName = osName.toLowerCase();
         if (osName.contains("win")) {
-            return "windows";
+            return "win";
         }
         if (osName.contains("mac") || osName.contains("darwin")) {
             return "macos";
@@ -85,13 +85,13 @@ public class NativeLibraryLoader {
 
     @NonNull
     private static String libraryPrefix(@NonNull String os) {
-        return os.equals("windows") ? "" : "lib";
+        return os.equals("win") ? "" : "lib";
     }
 
     @NonNull
     private static String libraryExtension(@NonNull String os) {
         return switch (os) {
-            case "windows" -> "dll";
+            case "win" -> "dll";
             case "macos" -> "dylib";
             case "linux" -> "so";
             default -> throw new AssertionError(os);

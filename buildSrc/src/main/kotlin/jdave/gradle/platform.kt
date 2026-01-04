@@ -59,8 +59,8 @@ enum class Architecture(val key: String?) {
 
     companion object {
         fun parse(triplet: String): Architecture = when {
-            "x86" in triplet -> X86
             "x86_64" in triplet -> X86_64
+            listOf("x86", "i386", "i486", "i586", "i686").any { it in triplet } -> X86
             "aarch64" in triplet -> AARCH64
             "arm" in triplet -> ARM
             "darwin" in triplet -> DARWIN

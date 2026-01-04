@@ -4,11 +4,6 @@ author: Minn
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v6
-      with:
-        submodules: recursive
-        fetch-depth: 0
-
     - name: Install dependencies
       run: |
         sudo apt-get update -y

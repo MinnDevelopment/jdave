@@ -19,7 +19,13 @@ jobs:
     name: Build Linux x64
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/build_linux
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build Artifacts
+        uses: ./.github/actions/build_linux
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

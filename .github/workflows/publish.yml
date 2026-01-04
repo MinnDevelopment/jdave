@@ -9,7 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: maven-central-release
     steps:
-      - uses: ./.github/actions/build_linux
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build Artifacts
+        uses: ./.github/actions/build_linux
+
       - name: Publish to Maven Central
         env:
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.MAVENCENTRAL_USERNAME }}

@@ -4,11 +4,10 @@ import static club.minnced.discord.jdave.ffi.LibDave.C_SIZE;
 import static club.minnced.discord.jdave.ffi.LibDave.readSize;
 
 import club.minnced.discord.jdave.ffi.LibDaveEncryptorBinding;
+import club.minnced.discord.jdave.ffi.NativeUtils;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
-
-import club.minnced.discord.jdave.ffi.NativeUtils;
 import org.jspecify.annotations.NonNull;
 
 public class DaveEncryptor implements AutoCloseable {

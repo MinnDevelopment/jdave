@@ -55,3 +55,4 @@ jobs:
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
           annotate_only: 'true'
+          test_files_prefix: 'native/'

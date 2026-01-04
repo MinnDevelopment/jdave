@@ -154,7 +154,7 @@ public class DaveSessionManager implements AutoCloseable {
 
     public void onMLSProposals(@NonNull ByteBuffer proposals) {
         log.debug("Handling MLS proposals");
-        session.processProposals(proposals, getUserIds(), callbacks::sendMLSCommitWelcome);
+        session.processProposals(proposals, getRecognizedUserIds(), callbacks::sendMLSCommitWelcome);
     }
 
     public void onMLSPrepareCommitTransition(int transitionId, @NonNull ByteBuffer commit) {
@@ -180,7 +180,7 @@ public class DaveSessionManager implements AutoCloseable {
 
     public void onMLSWelcome(int transitionId, @NonNull ByteBuffer welcome) {
         log.debug("Handling MLS welcome transition transitionId={}", transitionId);
-        boolean joinedGroup = session.processWelcome(welcome, getUserIds());
+        boolean joinedGroup = session.processWelcome(welcome, getRecognizedUserIds());
 
         if (joinedGroup) {
             prepareProtocolTransition(transitionId, session.getProtocolVersion());
@@ -194,7 +194,7 @@ public class DaveSessionManager implements AutoCloseable {
     }
 
     @NonNull
-    private List<@NonNull String> getUserIds() {
+    private List<@NonNull String> getRecognizedUserIds() {
         return LongStream.concat(
                         LongStream.of(selfUserId), decryptors.keySet().stream().mapToLong(id -> id))
                 .mapToObj(Long::toUnsignedString)
@@ -227,7 +227,7 @@ public class DaveSessionManager implements AutoCloseable {
                 return;
             }
 
-            decryptor.prepareTransition(session, selfUserId, protocolVersion);
+            decryptor.prepareTransition(session, userId, protocolVersion);
         });
 
         if (transitionId == DaveConstants.INIT_TRANSITION_ID) {

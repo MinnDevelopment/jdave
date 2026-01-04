@@ -200,9 +200,9 @@ public class LibDaveSessionBinding {
     }
 
     @NonNull
-    public static MemorySegment getKeyRatchet(@NonNull MemorySegment session, @NonNull MemorySegment selfUserId) {
+    public static MemorySegment getKeyRatchet(@NonNull MemorySegment session, @NonNull MemorySegment userId) {
         try {
-            return (MemorySegment) daveSessionGetKeyRatchet.invoke(session, selfUserId);
+            return (MemorySegment) daveSessionGetKeyRatchet.invoke(session, userId);
         } catch (Throwable e) {
             throw new LibDaveBindingException(e);
         }

@@ -50,9 +50,9 @@ public class DaveSessionImpl implements AutoCloseable {
         return LibDaveSessionBinding.getProtocolVersion(this.session);
     }
 
-    public MemorySegment getKeyRatchet(@NonNull String selfUserId) {
+    public MemorySegment getKeyRatchet(@NonNull String userId) {
         try (Arena local = Arena.ofConfined()) {
-            return LibDaveSessionBinding.getKeyRatchet(this.session, local.allocateFrom(selfUserId));
+            return LibDaveSessionBinding.getKeyRatchet(this.session, local.allocateFrom(userId));
         }
     }
 

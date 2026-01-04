@@ -14,8 +14,8 @@ public class DaveKeyRatchet implements AutoCloseable {
     }
 
     @NonNull
-    public static DaveKeyRatchet create(@NonNull DaveSessionImpl session, @NonNull String selfUserId) {
-        return new DaveKeyRatchet(session.getKeyRatchet(selfUserId));
+    public static DaveKeyRatchet create(@NonNull DaveSessionImpl session, @NonNull String userId) {
+        return new DaveKeyRatchet(session.getKeyRatchet(userId));
     }
 
     @NonNull

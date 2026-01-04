@@ -23,12 +23,12 @@ public class DaveDecryptor implements AutoCloseable {
         LibDaveDecryptorBinding.destroyDecryptor(decryptor);
     }
 
-    public void prepareTransition(@NonNull DaveSessionImpl session, long selfUserId, int protocolVersion) {
+    public void prepareTransition(@NonNull DaveSessionImpl session, long userId, int protocolVersion) {
         boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
         LibDaveDecryptorBinding.transitionToPassthroughMode(decryptor, disabled);
 
         if (!disabled) {
-            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(selfUserId))) {
+            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(userId))) {
                 updateKeyRatchet(keyRatchet);
             }
         }

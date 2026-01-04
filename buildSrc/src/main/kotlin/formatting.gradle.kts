@@ -8,7 +8,7 @@ configure<SpotlessExtension> {
     kotlinGradle { ktfmt().kotlinlangStyle() }
 
     java {
-        palantirJavaFormat()
+        palantirJavaFormat("2.83.0")
 
         removeUnusedImports()
         trimTrailingWhitespace()

@@ -49,7 +49,7 @@ configure<PublishingExtension> {
 
             pom.apply {
                 packaging = "jar"
-                description.set("Rust implementation of the JDA-NAS interface")
+                description.set("Discord Voice and Video End-to-End Encryption")
                 url.set("https://github.com/MinnDevelopment/jdave")
                 scm {
                     url.set("https://github.com/MinnDevelopment/jdave")

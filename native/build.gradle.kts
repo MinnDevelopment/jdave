@@ -35,5 +35,8 @@ tasks.test {
 
     testLogging { events("passed", "skipped", "failed") }
 
-    reports { html.required = true }
+    reports {
+        junitXml.required = true
+        html.required = true
+    }
 }

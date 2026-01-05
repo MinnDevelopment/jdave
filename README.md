@@ -32,7 +32,7 @@ repositories {
 dependencies {
     // Interface to use for libraries
     implementation("club.minnced:jdave-api:0.0.1")
-    
+
     // Compiled natives for libdave for the specified platform
     implementation("club.minnced:jdave-native-linux-x86-64:0.0.1")
 }
@@ -40,7 +40,7 @@ dependencies {
 
 ## Example: JDA
 
-To use this library with [JDA](https://github.com/discord-jda/JDA), you can use the [JDaveSessionFactory](src/main/java/club/minnced/discord/jdave/interop/JDaveSessionFactory.java) to configure the audio module:
+To use this library with [JDA](https://github.com/discord-jda/JDA), you can use the [JDaveSessionFactory](api/src/main/java/club/minnced/discord/jdave/interop/JDaveSessionFactory.java) to configure the audio module:
 
 ```java
 JDABuilder.createLight(TOKEN)

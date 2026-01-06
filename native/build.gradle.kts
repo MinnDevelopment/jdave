@@ -17,9 +17,14 @@ val nativeResourceRoot = "resources/libdave"
 
 val assembleNatives by
     tasks.registering(Copy::class) {
-        dependsOn(gradle.includedBuild("libdave").task(":cpp:cmakeAssemble"))
+        dependsOn(gradle.includedBuild("libdave").task(":cpp:assemble"))
 
-        from(project.layout.projectDirectory.dir("libdave/cpp/build/libs"))
+        from(project.layout.projectDirectory.dir("libdave/cpp/build/libs")) {
+            include {
+                it.name.endsWith(".so") || it.name.endsWith(".dll") || it.name.endsWith(".dylib")
+            }
+        }
+
         into(layout.buildDirectory.dir("$nativeResourceRoot/natives/${getPlatform()}"))
     }
 

@@ -42,7 +42,8 @@ public class LibDave {
                     SYMBOL_LOOKUP.find("daveSetLogSinkCallback").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
 
             // void free(void*);
-            free = LINKER.downcallHandle(SYMBOL_LOOKUP.find("free").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            free = LINKER.downcallHandle(
+                    LINKER.defaultLookup().find("free").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }

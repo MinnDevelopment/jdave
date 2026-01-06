@@ -66,20 +66,8 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Bootstrap vcpkg
-        run: native/libdave/cpp/vcpkg/bootstrap-vcpkg.bat
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 25
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Build Artifacts
-        run: ./gradlew build -Ptarget=x86_64-pc-windows-msvc
+        uses: ./.github/actions/build_windows
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4

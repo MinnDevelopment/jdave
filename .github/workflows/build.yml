@@ -76,3 +76,23 @@ jobs:
           path: |
             api/build/libs/*.jar
             native/build/libs/*.jar
+
+  macos:
+    name: Build Universal Darwin Binary
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build Artifacts
+        uses: ./.github/actions/build_macos
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Darwin
+          path: |
+            api/build/libs/*.jar
+            native/build/libs/*.jar

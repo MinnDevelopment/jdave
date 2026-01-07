@@ -1,0 +1,26 @@
+name: Build MacOS Artifacts
+author: Minn
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: brew install nasm go
+
+    - name: Bootstrap vcpkg
+      shell: bash
+      run: native/libdave/cpp/vcpkg/bootstrap-vcpkg.sh
+
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 25
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build Artifacts
+      shell: bash
+      run: ./gradlew build -Ptarget=darwin

@@ -22,7 +22,7 @@ Linux:
 
 Windows:
 
-[![](https://img.shields.io/maven-central/v/club.minnced/jdave-native-win-x86-64?color=blue&label=windows-x86-64)](https://search.maven.org/artifact/club.minnced/jdave-native-win-x86-64)
+[![](https://img.shields.io/maven-central/v/club.minnced/jdave-native-win-x86-64?color=blue&label=win-x86-64)](https://search.maven.org/artifact/club.minnced/jdave-native-win-x86-64)
 
 ## Installation
 

@@ -32,10 +32,10 @@ public class LibDaveSessionBinding {
     static {
         try {
             // DAVESessionHandle daveSessionCreate(
-            //   void* context, const char* authSessionId, DAVEMLSFailureCallback callback);
+            //   void* context, const char* authSessionId, DAVEMLSFailureCallback callback, void* userData);
             daveSessionCreate = LINKER.downcallHandle(
                     SYMBOL_LOOKUP.find("daveSessionCreate").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
 
             // void daveSessionDestroy(DAVESessionHandle session);
             daveSessionDestroy = LINKER.downcallHandle(
@@ -138,7 +138,8 @@ public class LibDaveSessionBinding {
     @NonNull
     public static MemorySegment createSession(@NonNull MemorySegment context, @NonNull MemorySegment authSessionId) {
         try {
-            return (MemorySegment) daveSessionCreate.invoke(context, authSessionId, MemorySegment.NULL);
+            return (MemorySegment)
+                    daveSessionCreate.invoke(context, authSessionId, MemorySegment.NULL, MemorySegment.NULL);
         } catch (Throwable e) {
             throw new LibDaveBindingException(e);
         }

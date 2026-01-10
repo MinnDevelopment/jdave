@@ -30,7 +30,7 @@ MacOS:
 
 ## Installation
 
-The coordinates for the dependency include the target platform, currently only one is supported.
+The coordinates for the dependency include the target platform.
 
 ```gradle
 repositories {

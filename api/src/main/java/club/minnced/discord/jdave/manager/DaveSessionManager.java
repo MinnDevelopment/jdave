@@ -44,7 +44,7 @@ public class DaveSessionManager implements AutoCloseable {
         this.channelId = channelId;
         this.callbacks = callbacks;
         this.session = session;
-        this.encryptor = DaveEncryptor.create(session);
+        this.encryptor = DaveEncryptor.create(session, selfUserId);
     }
 
     @NonNull
@@ -113,8 +113,8 @@ public class DaveSessionManager implements AutoCloseable {
     @SuppressWarnings("resource")
     public void addUser(long userId) {
         log.debug("Adding user {}", userId);
-        DaveDecryptor decryptor = decryptors.computeIfAbsent(userId, id -> DaveDecryptor.create());
-        decryptor.prepareTransition(session, userId, currentProtocolVersion);
+        DaveDecryptor decryptor = decryptors.computeIfAbsent(userId, id -> DaveDecryptor.create(id, session));
+        decryptor.prepareTransition(currentProtocolVersion);
     }
 
     public void removeUser(long userId) {
@@ -223,15 +223,11 @@ public class DaveSessionManager implements AutoCloseable {
                 return;
             }
 
-            decryptor.prepareTransition(session, userId, protocolVersion);
+            decryptor.prepareTransition(protocolVersion);
         });
 
         if (transitionId == DaveConstants.INIT_TRANSITION_ID) {
-            if (encryptor.prepareTransition(selfUserId, protocolVersion)) {
-                encryptor.processTransition(protocolVersion);
-            } else {
-                encryptor.processTransition(DISABLED_PROTOCOL_VERSION);
-            }
+            encryptor.processTransition(protocolVersion);
         } else {
             preparedTransitions.put(transitionId, protocolVersion);
             currentProtocolVersion = protocolVersion;

@@ -4,47 +4,61 @@ import static club.minnced.discord.jdave.ffi.LibDave.C_SIZE;
 import static club.minnced.discord.jdave.ffi.LibDave.readSize;
 
 import club.minnced.discord.jdave.ffi.LibDaveEncryptorBinding;
-import club.minnced.discord.jdave.ffi.NativeUtils;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DaveEncryptor implements AutoCloseable {
+    private static final Logger log = LoggerFactory.getLogger(DaveEncryptor.class);
     private final MemorySegment encryptor;
     private final DaveSessionImpl session;
+    private final long selfUserId;
 
-    private DaveEncryptor(@NonNull MemorySegment encryptor, @NonNull DaveSessionImpl session) {
+    private DaveEncryptor(@NonNull MemorySegment encryptor, @NonNull DaveSessionImpl session, long selfUserId) {
         this.encryptor = encryptor;
         this.session = session;
+        this.selfUserId = selfUserId;
 
         LibDaveEncryptorBinding.setPassthroughMode(encryptor, true);
     }
 
     @NonNull
-    public static DaveEncryptor create(DaveSessionImpl session) {
-        return new DaveEncryptor(LibDaveEncryptorBinding.createEncryptor(), session);
+    public static DaveEncryptor create(DaveSessionImpl session, long selfUserId) {
+        return new DaveEncryptor(LibDaveEncryptorBinding.createEncryptor(), session, selfUserId);
     }
 
     private void destroy() {
         LibDaveEncryptorBinding.destroyEncryptor(encryptor);
     }
 
-    public boolean prepareTransition(long selfUserId, int protocolVersion) {
+    public void prepareTransition(int protocolVersion) {
+        log.debug("Preparing to transition to protocol version {}", protocolVersion);
         boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
 
         if (!disabled) {
-            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(selfUserId))) {
-                LibDaveEncryptorBinding.setKeyRatchet(encryptor, keyRatchet.getMemorySegment());
-                return !NativeUtils.isNull(keyRatchet.getMemorySegment());
-            }
+            updateKeyRatchet();
         }
-        return false;
     }
 
     public void processTransition(int protocolVersion) {
+        log.debug("Transitioning to protocol version {}", protocolVersion);
         boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
+
+        if (!disabled) {
+            updateKeyRatchet();
+        }
+
         LibDaveEncryptorBinding.setPassthroughMode(encryptor, disabled);
+    }
+
+    private void updateKeyRatchet() {
+        try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(selfUserId))) {
+            log.debug("Updating key ratchet");
+            LibDaveEncryptorBinding.setKeyRatchet(encryptor, keyRatchet.getMemorySegment());
+        }
     }
 
     public long getMaxCiphertextByteSize(@NonNull DaveMediaType mediaType, long frameSize) {

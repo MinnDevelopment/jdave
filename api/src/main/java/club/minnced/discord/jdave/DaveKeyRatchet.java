@@ -15,6 +15,10 @@ public class DaveKeyRatchet implements AutoCloseable {
 
     @NonNull
     public static DaveKeyRatchet create(@NonNull DaveSessionImpl session, @NonNull String userId) {
+        if (session.getProtocolVersion() == DaveConstants.DISABLED_PROTOCOL_VERSION) {
+            return new DaveKeyRatchet(MemorySegment.NULL);
+        }
+
         return new DaveKeyRatchet(session.getKeyRatchet(userId));
     }
 

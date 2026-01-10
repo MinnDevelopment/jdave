@@ -3,6 +3,8 @@ package jdave;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import club.minnced.discord.jdave.DaveCodec;
+import club.minnced.discord.jdave.DaveConstants;
 import club.minnced.discord.jdave.DaveEncryptor;
 import club.minnced.discord.jdave.DaveSessionImpl;
 import club.minnced.discord.jdave.ffi.LibDave;
@@ -48,12 +50,12 @@ class BindingTest {
             assertEquals(1, session.getProtocolVersion());
             session.sendMarshalledKeyPackage(session::setExternalSender);
 
-            try (DaveEncryptor encryptor = DaveEncryptor.create(session)) {
-                encryptor.prepareTransition(selfUserId, 1);
+            try (DaveEncryptor encryptor = DaveEncryptor.create(session, selfUserId)) {
+                encryptor.prepareTransition(1);
                 encryptor.processTransition(1);
 
                 int ssrc = random.nextInt();
-                encryptor.assignSsrcToCodec(club.minnced.discord.jdave.DaveCodec.OPUS, ssrc);
+                encryptor.assignSsrcToCodec(DaveCodec.OPUS, ssrc);
 
                 byte[] plaintext = new byte[512];
                 random.nextBytes(plaintext);
@@ -82,13 +84,12 @@ class BindingTest {
         long selfUserId = random.nextLong();
 
         try (DaveSessionImpl session = DaveSessionImpl.create(null)) {
-            try (DaveEncryptor encryptor = DaveEncryptor.create(session)) {
-                encryptor.prepareTransition(
-                        selfUserId, club.minnced.discord.jdave.DaveConstants.DISABLED_PROTOCOL_VERSION);
-                encryptor.processTransition(club.minnced.discord.jdave.DaveConstants.DISABLED_PROTOCOL_VERSION);
+            try (DaveEncryptor encryptor = DaveEncryptor.create(session, selfUserId)) {
+                encryptor.prepareTransition(DaveConstants.DISABLED_PROTOCOL_VERSION);
+                encryptor.processTransition(DaveConstants.DISABLED_PROTOCOL_VERSION);
 
                 int ssrc = random.nextInt();
-                encryptor.assignSsrcToCodec(club.minnced.discord.jdave.DaveCodec.OPUS, ssrc);
+                encryptor.assignSsrcToCodec(DaveCodec.OPUS, ssrc);
 
                 byte[] plaintext = new byte[512];
                 random.nextBytes(plaintext);

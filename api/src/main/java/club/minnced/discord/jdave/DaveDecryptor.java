@@ -7,35 +7,46 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.ByteBuffer;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DaveDecryptor implements AutoCloseable {
+    private static final Logger log = LoggerFactory.getLogger(DaveDecryptor.class);
+    private final long userId;
+    private final DaveSessionImpl session;
     private final MemorySegment decryptor;
 
-    private DaveDecryptor(@NonNull MemorySegment decryptor) {
+    private DaveDecryptor(long userId, @NonNull DaveSessionImpl session, @NonNull MemorySegment decryptor) {
+        this.userId = userId;
+        this.session = session;
         this.decryptor = decryptor;
     }
 
-    public static DaveDecryptor create() {
-        return new DaveDecryptor(LibDaveDecryptorBinding.createDecryptor());
+    @NonNull
+    public static DaveDecryptor create(long userId, @NonNull DaveSessionImpl session) {
+        return new DaveDecryptor(userId, session, LibDaveDecryptorBinding.createDecryptor());
     }
 
     private void destroy() {
         LibDaveDecryptorBinding.destroyDecryptor(decryptor);
     }
 
-    public void prepareTransition(@NonNull DaveSessionImpl session, long userId, int protocolVersion) {
+    public void prepareTransition(int protocolVersion) {
+        log.debug("Preparing transition to protocol version {}", protocolVersion);
         boolean disabled = protocolVersion == DaveConstants.DISABLED_PROTOCOL_VERSION;
-        LibDaveDecryptorBinding.transitionToPassthroughMode(decryptor, disabled);
 
         if (!disabled) {
-            try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(userId))) {
-                updateKeyRatchet(keyRatchet);
-            }
+            updateKeyRatchet();
         }
+
+        LibDaveDecryptorBinding.transitionToPassthroughMode(decryptor, disabled);
     }
 
-    private void updateKeyRatchet(@NonNull DaveKeyRatchet ratchet) {
-        LibDaveDecryptorBinding.transitionToKeyRatchet(decryptor, ratchet.getMemorySegment());
+    private void updateKeyRatchet() {
+        try (DaveKeyRatchet keyRatchet = DaveKeyRatchet.create(session, Long.toUnsignedString(userId))) {
+            log.debug("Updating key ratchet");
+            LibDaveDecryptorBinding.transitionToKeyRatchet(decryptor, keyRatchet.getMemorySegment());
+        }
     }
 
     public long getMaxPlaintextByteSize(@NonNull DaveMediaType mediaType, long frameSize) {

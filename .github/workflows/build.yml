@@ -8,91 +8,55 @@ on:
     branches:
       - master
 
-env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 3
-  CMAKE_TOOLCHAIN_FILE: ${{ github.workspace }}/libdave/cpp/vcpkg/scripts/buildsystems/vcpkg.cmake
-  VCPKG_BINARY_SOURCES: files,${{ github.workspace }}/libdave/vcpkg_cache,readwrite
-  VCPKG_DISABLE_METRICS: 1
-
 jobs:
-  linux:
-    name: Build Linux x64
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux
+            runner: ubuntu-latest
+          - target: aarch64-unknown-linux
+            runner: ubuntu-latest
+            skip-test: true
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+          - target: darwin
+            runner: macos-latest
+
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v6
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
         with:
-          submodules: recursive
-          fetch-depth: 0
+          distribution: 'temurin'
+          java-version: '25'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build Artifacts
-        uses: ./.github/actions/build_linux
+        run: ./gradlew build -Ptarget=${{ matrix.target }} -x test
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Linux_x64
-          path: |
-            api/build/libs/*.jar
-            native/build/libs/*.jar
+      - name: Run Tests
+        if: ${{ !matrix.skip-test }}
+        run: ./gradlew test
 
-      - name: Upload JUnit XML Test Report
-        if: ${{ !cancelled() }}
+      - name: Upload Test Reports
+        if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: junit-xml-test-report
-          path: native/build/test-results/test
-
-      - name: Upload HTML Test Report
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: junit-html-test-report
-          path: native/build/reports/tests/test
-
-      - name: Annotate Failed Tests
-        uses: mikepenz/action-junit-report@v6
-        if: ${{ !cancelled() }}
-        with:
-          report_paths: '**/build/test-results/test/TEST-*.xml'
-          annotate_only: 'true'
-          test_files_prefix: 'native/'
-
-  windows:
-    name: Build Windows x64
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Build Artifacts
-        uses: ./.github/actions/build_windows
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows_x64
+          name: test-reports-${{ matrix.target }}
           path: |
-            api/build/libs/*.jar
-            native/build/libs/*.jar
-
-  macos:
-    name: Build Universal Darwin Binary
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Build Artifacts
-        uses: ./.github/actions/build_macos
+            **/build/reports/tests/**/*.html
+            **/build/test-results/**/*.xml
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Darwin
+          name: ${{ matrix.target }}
           path: |
             api/build/libs/*.jar
             native/build/libs/*.jar

@@ -1,5 +1,5 @@
 [libraries]
-jda = "net.dv8tion:JDA:6.2.1"
+jda = "net.dv8tion:JDA:6.3.0"
 jreleaser = "org.jreleaser:jreleaser-gradle-plugin:1.22.0"
 jspecify = "org.jspecify:jspecify:1.0.0"
 junit-bom = "org.junit:junit-bom:5.10.0"
@@ -10,3 +10,4 @@ spotless = "com.diffplug.spotless:spotless-plugin-gradle:7.2.1"
 
 [plugins]
 version-catalog-update = "nl.littlerobots.version-catalog-update:1.0.1"
+download = "de.undercouch.download:5.6.0"

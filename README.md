@@ -22,6 +22,7 @@ API:
 Linux:
 
 [![](https://img.shields.io/maven-central/v/club.minnced/jdave-native-linux-x86-64?color=blue&label=linux-x86-64&logo=linux&logoColor=white)](https://search.maven.org/artifact/club.minnced/jdave-native-linux-x86-64)
+[![](https://img.shields.io/maven-central/v/club.minnced/jdave-native-linux-aarch64?color=blue&label=linux-aarch64&logo=linux&logoColor=white)](https://search.maven.org/artifact/club.minnced/jdave-native-linux-aarch64)
 
 Windows:
 
@@ -46,6 +47,7 @@ dependencies {
 
     // Compiled natives for libdave for the specified platform
     implementation("club.minnced:jdave-native-linux-x86-64:0.1.0")
+    implementation("club.minnced:jdave-native-linux-aarch64:0.1.0")
     implementation("club.minnced:jdave-native-win-x86-64:0.1.0")
     implementation("club.minnced:jdave-native-darwin:0.1.0")
 }

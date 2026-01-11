@@ -1,32 +1,34 @@
 package jdave.gradle
 
 import org.gradle.api.Project
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 fun Project.getPlatform(triplet: String = targetPlatform) = Platform.parse(triplet)
 
 val Project.targetPlatform: String
-    get() = findProperty("target") as? String ?: run {
-        val osName = System.getProperty("os.name").lowercase()
-        val os = when {
-            "windows" in osName -> "windows"
-            "linux" in osName -> "linux"
-            "mac" in osName || "darwin" in osName -> "darwin"
-            else -> error("Unsupported OS: $osName")
+    get() = findProperty("target") as? String ?: detectPlatformTriplet()
+
+fun detectPlatformTriplet(): String {
+    val os = with(DefaultNativePlatform.getCurrentOperatingSystem()) {
+        when {
+            isMacOsX -> "darwin"
+            isWindows -> "windows"
+            isLinux -> "linux"
+            else -> error("Unknown operating system: $this")
         }
-
-        val archName = System.getProperty("os.arch").lowercase()
-        val arch = when {
-            archName in listOf("x86_64", "amd64") -> "x86_64"
-            archName in listOf("x86", "i386", "i486", "i586", "i686") -> "x86"
-            archName == "aarch64" -> "aarch64"
-            archName.startsWith("arm") -> "arm"
-            else -> error("Unsupported architecture: $archName")
-        }
-
-        val musl = if (os == "linux" && "musl" in System.getProperty("java.vm.name").lowercase()) "-musl" else ""
-
-        "$arch-unknown-$os$musl"
     }
+
+    val arch = with(DefaultNativePlatform.getCurrentArchitecture()) {
+        when {
+            isAmd64 -> "x86_64"
+            isArm64 -> "aarch64"
+            isArm -> "arm"
+            else -> error("Unknown architecture: $this")
+        }
+    }
+
+    return "$arch-unknown-$os"
+}
 
 data class Platform(val operatingSystem: OperatingSystem, val arch: Architecture, val musl: Boolean) {
     companion object {

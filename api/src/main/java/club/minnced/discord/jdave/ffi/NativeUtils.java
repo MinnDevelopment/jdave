@@ -9,7 +9,6 @@ public class NativeUtils {
     @NonNull
     public static String asJavaString(@NonNull MemorySegment nullTerminatedString) {
         return nullTerminatedString
-            .reinterpret(Long.MAX_VALUE)
             .getString(0);
     }
 

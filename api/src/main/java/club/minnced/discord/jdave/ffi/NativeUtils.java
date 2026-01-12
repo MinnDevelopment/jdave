@@ -10,7 +10,7 @@ public class NativeUtils {
     public static String asJavaString(@NonNull MemorySegment nullTerminatedString) {
         return nullTerminatedString
             .reinterpret(Long.MAX_VALUE)
-            .getString(0, StandardCharsets.UTF_8);
+            .getString(0);
     }
 
     public static boolean isNull(@Nullable MemorySegment segment) {

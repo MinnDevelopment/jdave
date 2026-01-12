@@ -120,7 +120,7 @@ public class LibDave {
 
             try {
                 logSinkCallback.onLogSink(
-                    severityEnum, NativeUtils.asJavaString(file), line, NativeUtils.asJavaString(message));
+                        severityEnum, NativeUtils.asJavaString(file), line, NativeUtils.asJavaString(message));
             } catch (Throwable t) {
                 log.error("Caught unexpected exception while trying to log message", t);
             }

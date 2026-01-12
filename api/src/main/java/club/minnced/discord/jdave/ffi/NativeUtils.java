@@ -9,6 +9,7 @@ public class NativeUtils {
     @NonNull
     public static String asJavaString(@NonNull MemorySegment nullTerminatedString) {
         return nullTerminatedString
+            .reinterpret(12288) // 12K
             .getString(0);
     }
 

@@ -8,7 +8,9 @@ import org.jspecify.annotations.Nullable;
 public class NativeUtils {
     @NonNull
     public static String asJavaString(@NonNull MemorySegment nullTerminatedString) {
-        return nullTerminatedString.reinterpret(4096).getString(0, StandardCharsets.UTF_8);
+        return nullTerminatedString
+            .reinterpret(Long.MAX_VALUE)
+            .getString(0, StandardCharsets.UTF_8);
     }
 
     public static boolean isNull(@Nullable MemorySegment segment) {

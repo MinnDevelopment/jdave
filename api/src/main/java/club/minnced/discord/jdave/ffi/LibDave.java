@@ -118,8 +118,12 @@ public class LibDave {
                         default -> DaveLoggingSeverity.UNKNOWN;
                     };
 
-            logSinkCallback.onLogSink(
+            try {
+                logSinkCallback.onLogSink(
                     severityEnum, NativeUtils.asJavaString(file), line, NativeUtils.asJavaString(message));
+            } catch (Throwable t) {
+                log.error("Caught unexpected exception while trying to log message", t);
+            }
         }
 
         @NonNull

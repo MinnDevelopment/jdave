@@ -112,6 +112,10 @@ public class DaveSessionManager implements AutoCloseable {
 
     @SuppressWarnings("resource")
     public void addUser(long userId) {
+        if (decryptors.containsKey(userId)) {
+            return;
+        }
+
         log.debug("Adding user {}", userId);
         DaveDecryptor decryptor = decryptors.computeIfAbsent(userId, id -> DaveDecryptor.create(id, session));
         decryptor.prepareTransition(currentProtocolVersion);

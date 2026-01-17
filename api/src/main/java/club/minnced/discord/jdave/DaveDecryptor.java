@@ -69,6 +69,8 @@ public class DaveDecryptor implements AutoCloseable {
             DaveDecryptResultType resultType = DaveDecryptResultType.fromRaw(result);
             if (resultType == DaveDecryptResultType.SUCCESS && bytesWritten > 0) {
                 decrypted.limit(decrypted.position() + (int) bytesWritten);
+            } else if (resultType != DaveDecryptResultType.SUCCESS) {
+                log.warn("Decrypt failed with error code {}", resultType);
             }
 
             return new DaveDecryptResult(resultType, bytesWritten);
@@ -85,12 +87,18 @@ public class DaveDecryptor implements AutoCloseable {
     public enum DaveDecryptResultType {
         SUCCESS,
         FAILURE,
+        MISSING_KEY_RATCHET,
+        MISSING_CRYPTOR,
+        TOO_MANY_ATTEMPTS,
         ;
 
         @NonNull
         public static DaveDecryptResultType fromRaw(int type) {
             return switch (type) {
                 case 0 -> SUCCESS;
+                case 2 -> MISSING_KEY_RATCHET;
+                case 3 -> MISSING_CRYPTOR;
+                case 4 -> TOO_MANY_ATTEMPTS;
                 default -> FAILURE;
             };
         }

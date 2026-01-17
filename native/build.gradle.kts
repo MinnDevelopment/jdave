@@ -36,7 +36,7 @@ fun getArtifactName(): String {
 }
 
 fun getArtifactDownloadUrl(): String {
-    return "https://github.com/MinnDevelopment/libdave/releases/download/v0.1.0/${getArtifactName()}"
+    return "https://github.com/MinnDevelopment/libdave/releases/download/v1.1.0/${getArtifactName()}"
 }
 
 val nativeResourceRoot = "resources/libdave"

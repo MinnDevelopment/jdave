@@ -138,6 +138,10 @@ public class DaveSessionManager implements AutoCloseable {
             return;
         }
 
+        if (decryptors.containsKey(userId)) {
+            return;
+        }
+
         log.debug("Adding user {}", userId);
         DaveDecryptor decryptor = decryptors.computeIfAbsent(userId, id -> DaveDecryptor.create(id, session));
         decryptor.prepareTransition(currentProtocolVersion);
@@ -299,7 +303,13 @@ public class DaveSessionManager implements AutoCloseable {
 
     private void executeProtocolTransition(int transitionId) {
         Integer protocolVersion = preparedTransitions.remove(transitionId);
+
         if (protocolVersion == null) {
+            if (transitionId == DaveConstants.INIT_TRANSITION_ID) {
+                log.debug("Passing through transition with ID 0");
+                return;
+            }
+
             log.warn("Unexpected Transition ID {}", transitionId);
             return;
         }

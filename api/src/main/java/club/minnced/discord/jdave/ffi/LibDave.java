@@ -5,7 +5,6 @@ import static java.lang.foreign.ValueLayout.*;
 import club.minnced.discord.jdave.DaveLoggingSeverity;
 import club.minnced.discord.jdave.utils.DaveLogger;
 import club.minnced.discord.jdave.utils.NativeLibraryLoader;
-import club.minnced.discord.jdave.utils.NativeLibraryLoader.OperatingSystem;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;

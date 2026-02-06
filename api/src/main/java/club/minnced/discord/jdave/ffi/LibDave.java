@@ -29,7 +29,7 @@ public class LibDave {
     static final Logger log = LoggerFactory.getLogger(LibDave.class);
     static final MethodHandle daveMaxSupportedProtocolVersion;
     static final MethodHandle daveSetLogSinkCallback;
-    static final MethodHandle free;
+    static final MethodHandle daveFree;
 
     static {
         try {
@@ -42,29 +42,9 @@ public class LibDave {
             daveSetLogSinkCallback = LINKER.downcallHandle(
                     SYMBOL_LOOKUP.find("daveSetLogSinkCallback").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
 
-            MemorySegment freePtr;
-            if (NativeLibraryLoader.getOperatingSystem() == OperatingSystem.LINUX) {
-                // void* dlsym(void*, char*);
-                MethodHandle dlsym = LINKER.downcallHandle(
-                        LINKER.defaultLookup().find("dlsym").orElseThrow(),
-                        FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS));
-
-                // The Linker.nativeLinker() doesn't take into account LD_PRELOAD
-                // which means if we change the allocator to something like jemalloc
-                // or tcmalloc it will not get the correct free(void*) function causing
-                // it to segfault when called.
-                //
-                // Instead, we are using dlsym with RTLD_DEFAULT (i.e. 0 or MemorySegment.NULL)
-                // which will find the correct function.
-                try (Arena arena = Arena.ofConfined()) {
-                    freePtr = (MemorySegment) dlsym.invoke(MemorySegment.NULL, arena.allocateFrom("free"));
-                }
-            } else {
-                freePtr = LINKER.defaultLookup().find("free").orElseThrow();
-            }
-
-            // void free(void*);
-            free = LINKER.downcallHandle(freePtr, FunctionDescriptor.ofVoid(ADDRESS));
+            // void daveFree(void*);
+            daveFree = LINKER.downcallHandle(
+                    SYMBOL_LOOKUP.find("daveFree").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -74,7 +54,7 @@ public class LibDave {
 
     public static void free(@NonNull MemorySegment segment) {
         try {
-            free.invoke(segment);
+            daveFree.invoke(segment);
         } catch (Throwable e) {
             throw new LibDaveBindingException(e);
         }

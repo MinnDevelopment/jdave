@@ -69,11 +69,6 @@ public class NativeLibraryLoader {
     }
 
     @NonNull
-    public static OperatingSystem getOperatingSystem() {
-        return getOperatingSystem(System.getProperty("os.name"));
-    }
-
-    @NonNull
     private static OperatingSystem getOperatingSystem(@NonNull String osName) {
         osName = osName.toLowerCase();
         if (osName.contains("linux")) {

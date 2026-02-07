@@ -1,7 +1,7 @@
 package club.minnced.discord.jdave;
 
-import static club.minnced.discord.jdave.ffi.LibDave.C_SIZE;
 import static club.minnced.discord.jdave.ffi.LibDave.readSize;
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.C_SIZE;
 
 import club.minnced.discord.jdave.ffi.LibDaveEncryptorBinding;
 import java.lang.foreign.Arena;

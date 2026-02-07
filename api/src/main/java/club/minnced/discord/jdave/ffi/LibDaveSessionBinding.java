@@ -1,6 +1,7 @@
 package club.minnced.discord.jdave.ffi;
 
 import static club.minnced.discord.jdave.ffi.LibDave.*;
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.*;
 import static club.minnced.discord.jdave.ffi.NativeUtils.toSizeT;
 import static java.lang.foreign.ValueLayout.*;
 
@@ -33,103 +34,81 @@ public class LibDaveSessionBinding {
         try {
             // DAVESessionHandle daveSessionCreate(
             //   void* context, const char* authSessionId, DAVEMLSFailureCallback callback, void* userData);
-            daveSessionCreate = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionCreate").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+            daveSessionCreate = find(ADDRESS, "daveSessionCreate", ADDRESS, ADDRESS, ADDRESS, ADDRESS);
 
             // void daveSessionDestroy(DAVESessionHandle session);
-            daveSessionDestroy = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveSessionDestroy = findVoid("daveSessionDestroy", ADDRESS);
 
             // void daveSessionInit(
             //   DAVESessionHandle session, uint16_t version, uint64_t groupId, const char* selfUserId);
-            daveSessionInit = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionInit").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, JAVA_SHORT, JAVA_LONG, ADDRESS));
+            daveSessionInit = findVoid("daveSessionInit", ADDRESS, JAVA_SHORT, JAVA_LONG, ADDRESS);
 
             // void daveSessionReset(DAVESessionHandle session);
-            daveSessionReset = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionReset").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveSessionReset = findVoid("daveSessionReset", ADDRESS);
 
             // void daveSessionSetProtocolVersion(DAVESessionHandle session, uint16_t version);
-            daveSessionSetProtocolVersion = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionSetProtocolVersion").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, JAVA_SHORT));
+            daveSessionSetProtocolVersion = findVoid("daveSessionSetProtocolVersion", ADDRESS, JAVA_SHORT);
 
             // uint16_t daveSessionGetProtocolVersion(DAVESessionHandle session);
-            daveSessionGetProtocolVersion = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionGetProtocolVersion").orElseThrow(),
-                    FunctionDescriptor.of(JAVA_SHORT, ADDRESS));
+            daveSessionGetProtocolVersion = find(JAVA_SHORT, "daveSessionGetProtocolVersion", ADDRESS);
 
             // void daveSessionGetMarshalledKeyPackage(
             //   DAVESessionHandle session, uint8_t** keyPackage, size_t* length);
-            daveSessionGetMarshalledKeyPackage = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionGetMarshalledKeyPackage").orElseThrow(),
-                    FunctionDescriptor.ofVoid(
-                            ADDRESS, ADDRESS.withTargetLayout(ADDRESS), ADDRESS.withTargetLayout(C_SIZE)));
+            daveSessionGetMarshalledKeyPackage = findVoid(
+                    "daveSessionGetMarshalledKeyPackage",
+                    ADDRESS,
+                    ADDRESS.withTargetLayout(ADDRESS),
+                    ADDRESS.withTargetLayout(C_SIZE));
 
             // DAVEKeyRatchetHandle daveSessionGetKeyRatchet(DAVESessionHandle session, const char* userId);
-            daveSessionGetKeyRatchet = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionGetKeyRatchet").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS));
+            daveSessionGetKeyRatchet = find(ADDRESS, "daveSessionGetKeyRatchet", ADDRESS, ADDRESS);
 
             // void daveSessionGetLastEpochAuthenticator(
             //   DAVESessionHandle session, uint8_t** authenticator, size_t* length);
-            daveSessionGetLastEpochAuthenticator = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionGetLastEpochAuthenticator").orElseThrow(),
-                    FunctionDescriptor.ofVoid(
-                            ADDRESS, ADDRESS.withTargetLayout(ADDRESS), ADDRESS.withTargetLayout(C_SIZE)));
+            daveSessionGetLastEpochAuthenticator = findVoid(
+                    "daveSessionGetLastEpochAuthenticator",
+                    ADDRESS,
+                    ADDRESS.withTargetLayout(ADDRESS),
+                    ADDRESS.withTargetLayout(C_SIZE));
 
             // void daveSessionSetExternalSender(
             //   DAVESessionHandle session, uint8_t* externalSender, size_t length);
-            daveSessionSetExternalSender = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionSetExternalSender").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, ADDRESS, C_SIZE));
+            daveSessionSetExternalSender = findVoid("daveSessionSetExternalSender", ADDRESS, ADDRESS, C_SIZE);
 
             // void daveSessionProcessProposals(
             //   DAVESessionHandle session, uint8_t* proposals, size_t length, char** recognizedUserIds,
             //   size_t recognizedUserIdsLength, uint8_t** commitWelcomeBytes, size_t* commitWelcomeBytesLength);
-            daveSessionProcessProposals = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionProcessProposals").orElseThrow(),
-                    FunctionDescriptor.ofVoid(
-                            ADDRESS,
-                            ADDRESS.withTargetLayout(JAVA_BYTE),
-                            C_SIZE,
-                            ADDRESS,
-                            C_SIZE,
-                            ADDRESS,
-                            ADDRESS.withTargetLayout(C_SIZE)));
+            daveSessionProcessProposals = findVoid(
+                    "daveSessionProcessProposals",
+                    ADDRESS,
+                    ADDRESS.withTargetLayout(JAVA_BYTE),
+                    C_SIZE,
+                    ADDRESS,
+                    C_SIZE,
+                    ADDRESS,
+                    ADDRESS.withTargetLayout(C_SIZE));
 
             // DAVECommitResultHandle daveSessionProcessCommit(
             //   DAVESessionHandle session, uint8_t* commit, size_t length);
-            daveSessionProcessCommit = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionProcessCommit").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, C_SIZE));
+            daveSessionProcessCommit = find(ADDRESS, "daveSessionProcessCommit", ADDRESS, ADDRESS, C_SIZE);
 
             // bool daveCommitResultIsIgnored(DAVECommitResultHandle commitResultHandle);
-            daveCommitResultIsIgnored = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveCommitResultIsIgnored").orElseThrow(),
-                    FunctionDescriptor.of(JAVA_BOOLEAN, ADDRESS));
+            daveCommitResultIsIgnored = find(JAVA_BOOLEAN, "daveCommitResultIsIgnored", ADDRESS);
 
             // bool daveCommitResultIsFailed(DAVECommitResultHandle commitResultHandle);
-            daveCommitResultIsFailed = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveCommitResultIsFailed").orElseThrow(),
-                    FunctionDescriptor.of(JAVA_BOOLEAN, ADDRESS));
+            daveCommitResultIsFailed = find(JAVA_BOOLEAN, "daveCommitResultIsFailed", ADDRESS);
 
             // void daveCommitResultDestroy(DAVECommitResultHandle commitResultHandle);
-            daveCommitResultDestroy = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveCommitResultDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveCommitResultDestroy = findVoid("daveCommitResultDestroy", ADDRESS);
 
             // DAVEWelcomeResultHandle daveSessionProcessWelcome(
             //   DAVESessionHandle session, uint8_t* welcome, size_t length,
             //   char** recognizedUserIds, size_t recognizedUserIdsLength);
-            daveSessionProcessWelcome = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSessionProcessWelcome").orElseThrow(),
-                    FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS, C_SIZE, ADDRESS, C_SIZE));
+            daveSessionProcessWelcome =
+                    find(ADDRESS, "daveSessionProcessWelcome", ADDRESS, ADDRESS, C_SIZE, ADDRESS, C_SIZE);
 
             // void daveWelcomeResultDestroy(DAVEWelcomeResultHandle welcomeResultHandle);
-            daveWelcomeResultDestroy = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveWelcomeResultDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveWelcomeResultDestroy = findVoid("daveWelcomeResultDestroy", ADDRESS);
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }

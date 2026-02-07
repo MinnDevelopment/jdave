@@ -1,12 +1,10 @@
 package club.minnced.discord.jdave.ffi;
 
-import static club.minnced.discord.jdave.ffi.LibDave.*;
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.*;
 import static club.minnced.discord.jdave.ffi.NativeUtils.toSizeT;
 import static java.lang.foreign.ValueLayout.*;
 
-import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
-import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import org.jspecify.annotations.NonNull;
 
@@ -23,54 +21,42 @@ public class LibDaveEncryptorBinding {
     static {
         try {
             // DAVEEncryptorHandle daveEncryptorCreate(void);
-            daveEncryptorCreate = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorCreate").orElseThrow(), FunctionDescriptor.of(ADDRESS));
+            daveEncryptorCreate = find(ADDRESS, "daveEncryptorCreate");
 
             // void daveEncryptorDestroy(DAVEEncryptorHandle encryptor);
-            daveEncryptorDestroy = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveEncryptorDestroy = findVoid("daveEncryptorDestroy", ADDRESS);
 
             // void daveEncryptorSetKeyRatchet(DAVEEncryptorHandle encryptor, DAVEKeyRatchetHandle keyRatchet);
-            daveEncryptorSetKeyRatchet = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorSetKeyRatchet").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, ADDRESS));
+            daveEncryptorSetKeyRatchet = findVoid("daveEncryptorSetKeyRatchet", ADDRESS, ADDRESS);
 
             // void daveEncryptorSetPassthroughMode(DAVEEncryptorHandle encryptor, bool passthroughMode);
-            daveEncryptorSetPassthroughMode = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorSetPassthroughMode").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, JAVA_BOOLEAN));
+            daveEncryptorSetPassthroughMode = findVoid("daveEncryptorSetPassthroughMode", ADDRESS, JAVA_BOOLEAN);
 
             // uint16_t daveEncryptorGetProtocolVersion(DAVEEncryptorHandle encryptor);
-            daveEncryptorGetProtocolVersion = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorGetProtocolVersion").orElseThrow(),
-                    FunctionDescriptor.of(ValueLayout.JAVA_SHORT, ADDRESS));
+            daveEncryptorGetProtocolVersion = find(JAVA_SHORT, "daveEncryptorGetProtocolVersion", ADDRESS);
 
             // size_t daveEncryptorGetMaxCiphertextByteSize(DAVEEncryptorHandle encryptor, DAVEMediaType mediaType,
             // size_t frameSize);
-            daveEncryptorGetMaxCiphertextByteSize = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorGetMaxCiphertextByteSize").orElseThrow(),
-                    FunctionDescriptor.of(C_SIZE, ADDRESS, JAVA_INT, C_SIZE));
+            daveEncryptorGetMaxCiphertextByteSize =
+                    find(C_SIZE, "daveEncryptorGetMaxCiphertextByteSize", ADDRESS, JAVA_INT, C_SIZE);
 
             // DAVEEncryptorResultCode daveEncryptorEncrypt(DAVEEncryptorHandle encryptor, DAVEMediaType mediaType,
             // uint32_t ssrc, const uint8_t* frame, size_t frameLength, uint8_t* encryptedFrame, size_t
             // encryptedFrameCapacity, size_t* bytesWritten);
-            daveEncryptorEncrypt = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorEncrypt").orElseThrow(),
-                    FunctionDescriptor.of(
-                            JAVA_INT,
-                            ADDRESS,
-                            JAVA_INT,
-                            JAVA_INT,
-                            ADDRESS,
-                            C_SIZE,
-                            ADDRESS,
-                            C_SIZE,
-                            ADDRESS.withTargetLayout(C_SIZE)));
+            daveEncryptorEncrypt = find(
+                    JAVA_INT,
+                    "daveEncryptorEncrypt",
+                    ADDRESS,
+                    JAVA_INT,
+                    JAVA_INT,
+                    ADDRESS,
+                    C_SIZE,
+                    ADDRESS,
+                    C_SIZE,
+                    ADDRESS.withTargetLayout(C_SIZE));
 
             // void daveEncryptorAssignSsrcToCodec(DAVEEncryptorHandle encryptor, uint32_t ssrc, DAVECodec codecType);
-            daveEncryptorAssignSsrcToCodec = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveEncryptorAssignSsrcToCodec").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, JAVA_INT, JAVA_INT));
+            daveEncryptorAssignSsrcToCodec = findVoid("daveEncryptorAssignSsrcToCodec", ADDRESS, JAVA_INT, JAVA_INT);
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }

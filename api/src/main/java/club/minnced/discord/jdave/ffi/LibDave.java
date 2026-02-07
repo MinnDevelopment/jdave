@@ -1,10 +1,10 @@
 package club.minnced.discord.jdave.ffi;
 
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.*;
 import static java.lang.foreign.ValueLayout.*;
 
 import club.minnced.discord.jdave.DaveLoggingSeverity;
 import club.minnced.discord.jdave.utils.DaveLogger;
-import club.minnced.discord.jdave.utils.NativeLibraryLoader;
 import java.lang.foreign.*;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -14,15 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LibDave {
-    static final Linker LINKER = Linker.nativeLinker();
-    static final SymbolLookup SYMBOL_LOOKUP;
-    public static final MemoryLayout C_SIZE;
-
-    static {
-        SYMBOL_LOOKUP = NativeLibraryLoader.getSymbolLookup();
-        C_SIZE = LINKER.canonicalLayouts().get("size_t");
-    }
-
     private LibDave() {}
 
     static final Logger log = LoggerFactory.getLogger(LibDave.class);
@@ -33,17 +24,13 @@ public class LibDave {
     static {
         try {
             // uint16_t daveMaxSupportedProtocolVersion(void);
-            daveMaxSupportedProtocolVersion = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveMaxSupportedProtocolVersion").orElseThrow(),
-                    FunctionDescriptor.of(JAVA_SHORT));
+            daveMaxSupportedProtocolVersion = find(JAVA_SHORT, "daveMaxSupportedProtocolVersion");
 
             // void daveSetLogSinkCallback(DAVELogSinkCallback callback);
-            daveSetLogSinkCallback = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveSetLogSinkCallback").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveSetLogSinkCallback = findVoid("daveSetLogSinkCallback", ADDRESS);
 
             // void daveFree(void*);
-            daveFree = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveFree").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveFree = findVoid("daveFree", ADDRESS);
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }

@@ -28,7 +28,7 @@ public class LibDave {
     static final Logger log = LoggerFactory.getLogger(LibDave.class);
     static final MethodHandle daveMaxSupportedProtocolVersion;
     static final MethodHandle daveSetLogSinkCallback;
-    static final MethodHandle free;
+    static final MethodHandle daveFree;
 
     static {
         try {
@@ -41,9 +41,9 @@ public class LibDave {
             daveSetLogSinkCallback = LINKER.downcallHandle(
                     SYMBOL_LOOKUP.find("daveSetLogSinkCallback").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
 
-            // void free(void*);
-            free = LINKER.downcallHandle(
-                    LINKER.defaultLookup().find("free").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            // void daveFree(void*);
+            daveFree = LINKER.downcallHandle(
+                    SYMBOL_LOOKUP.find("daveFree").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -53,7 +53,7 @@ public class LibDave {
 
     public static void free(@NonNull MemorySegment segment) {
         try {
-            free.invoke(segment);
+            daveFree.invoke(segment);
         } catch (Throwable e) {
             throw new LibDaveBindingException(e);
         }

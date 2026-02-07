@@ -1,11 +1,10 @@
 package club.minnced.discord.jdave.ffi;
 
-import static club.minnced.discord.jdave.ffi.LibDave.*;
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.*;
 import static club.minnced.discord.jdave.ffi.NativeUtils.toSizeT;
 import static java.lang.foreign.ValueLayout.*;
 
 import club.minnced.discord.jdave.DaveMediaType;
-import java.lang.foreign.FunctionDescriptor;
 import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import org.jspecify.annotations.NonNull;
@@ -22,45 +21,36 @@ public class LibDaveDecryptorBinding {
     static {
         try {
             // DAVEDecryptorHandle daveDecryptorCreate(void);
-            daveDecryptorCreate = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveDecryptorCreate").orElseThrow(), FunctionDescriptor.of(ADDRESS));
+            daveDecryptorCreate = find(ADDRESS, "daveDecryptorCreate");
 
             // void daveDecryptorDestroy(DAVEDecryptorHandle decryptor);
-            daveDecryptorDestroy = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveDecryptorDestroy").orElseThrow(), FunctionDescriptor.ofVoid(ADDRESS));
+            daveDecryptorDestroy = findVoid("daveDecryptorDestroy", ADDRESS);
 
             // size_t daveDecryptorGetMaxPlaintextByteSize(DAVEDecryptorHandle decryptor, DAVEMediaType mediaType,
             // size_t encryptedFrameSize);
-            daveDecryptorGetMaxPlaintextByteSize = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveDecryptorGetMaxPlaintextByteSize").orElseThrow(),
-                    FunctionDescriptor.of(C_SIZE, ADDRESS, JAVA_INT, C_SIZE));
+            daveDecryptorGetMaxPlaintextByteSize =
+                    find(C_SIZE, "daveDecryptorGetMaxPlaintextByteSize", ADDRESS, JAVA_INT, C_SIZE);
 
             // DAVEDecryptorResultCode daveDecryptorDecrypt(DAVEDecryptorHandle decryptor, DAVEMediaType mediaType,
             // const uint8_t* encryptedFrame, size_t encryptedFrameLength, uint8_t* frame, size_t frameCapacity, size_t*
             // bytesWritten);
-            daveDecryptorDecrypt = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveDecryptorDecrypt").orElseThrow(),
-                    FunctionDescriptor.of(
-                            JAVA_INT,
-                            ADDRESS,
-                            JAVA_INT,
-                            ADDRESS,
-                            C_SIZE,
-                            ADDRESS,
-                            C_SIZE,
-                            ADDRESS.withTargetLayout(C_SIZE)));
+            daveDecryptorDecrypt = find(
+                    JAVA_INT,
+                    "daveDecryptorDecrypt",
+                    ADDRESS,
+                    JAVA_INT,
+                    ADDRESS,
+                    C_SIZE,
+                    ADDRESS,
+                    C_SIZE,
+                    ADDRESS.withTargetLayout(C_SIZE));
 
             // void daveDecryptorTransitionToKeyRatchet(DAVEDecryptorHandle decryptor, DAVEKeyRatchetHandle keyRatchet);
-            daveDecryptorTransitionToKeyRatchet = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP.find("daveDecryptorTransitionToKeyRatchet").orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, ADDRESS));
+            daveDecryptorTransitionToKeyRatchet = findVoid("daveDecryptorTransitionToKeyRatchet", ADDRESS, ADDRESS);
 
             // void daveDecryptorTransitionToPassthroughMode(DAVEDecryptorHandle decryptor, bool passthroughMode);
-            daveDecryptorTransitionToPassthroughMode = LINKER.downcallHandle(
-                    SYMBOL_LOOKUP
-                            .find("daveDecryptorTransitionToPassthroughMode")
-                            .orElseThrow(),
-                    FunctionDescriptor.ofVoid(ADDRESS, JAVA_BOOLEAN));
+            daveDecryptorTransitionToPassthroughMode =
+                    findVoid("daveDecryptorTransitionToPassthroughMode", ADDRESS, JAVA_BOOLEAN);
         } catch (Throwable e) {
             throw new ExceptionInInitializerError(e);
         }

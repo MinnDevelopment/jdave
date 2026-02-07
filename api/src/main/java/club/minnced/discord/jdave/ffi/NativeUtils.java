@@ -1,5 +1,7 @@
 package club.minnced.discord.jdave.ffi;
 
+import static club.minnced.discord.jdave.ffi.LibDaveLookup.C_SIZE;
+
 import java.lang.foreign.*;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -15,7 +17,7 @@ public class NativeUtils {
     }
 
     static Object toSizeT(long number) {
-        return LibDave.C_SIZE.byteSize() == 8 ? number : (int) number;
+        return C_SIZE.byteSize() == 8 ? number : (int) number;
     }
 
     static long sizeToLong(@NonNull Object size) {

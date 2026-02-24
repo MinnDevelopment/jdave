@@ -24,7 +24,14 @@ public class DaveSessionImpl implements AutoCloseable {
             MemorySegment authSessionIdSegment =
                     authSessionId != null ? local.allocateFrom(authSessionId) : MemorySegment.NULL;
             MemorySegment session = LibDaveSessionBinding.createSession(MemorySegment.NULL, authSessionIdSegment);
-            return new DaveSessionImpl(session);
+
+            DaveSessionImpl result = new DaveSessionImpl(session);
+            // this part of memory is not initialized by libdave
+            // until we call #initialize or #reset meaning it just
+            // has a random value of whatever was there before making
+            // it very confusing to debug
+            result.setProtocolVersion((short) -1);
+            return result;
         }
     }
 

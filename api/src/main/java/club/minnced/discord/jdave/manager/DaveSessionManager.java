@@ -229,7 +229,7 @@ public class DaveSessionManager implements AutoCloseable {
                     prepareProtocolTransition(transitionId, session.getProtocolVersion());
                 } else {
                     sendInvalidCommitWelcome(transitionId);
-                    handleDaveProtocolInit(transitionId);
+                    handleDaveProtocolInit(session.getProtocolVersion());
                 }
             }
         }
@@ -247,7 +247,7 @@ public class DaveSessionManager implements AutoCloseable {
             prepareProtocolTransition(transitionId, session.getProtocolVersion());
         } else {
             sendInvalidCommitWelcome(transitionId);
-            handleDaveProtocolInit(transitionId);
+            handleDaveProtocolInit(session.getProtocolVersion());
         }
     }
 
@@ -292,9 +292,10 @@ public class DaveSessionManager implements AutoCloseable {
             encryptor.processTransition(protocolVersion);
         } else {
             preparedTransitions.put(transitionId, protocolVersion);
-            currentProtocolVersion = protocolVersion;
             callbacks.sendDaveProtocolReadyForTransition(transitionId);
         }
+
+        currentProtocolVersion = protocolVersion;
     }
 
     private void executeProtocolTransition(int transitionId) {

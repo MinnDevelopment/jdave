@@ -11,8 +11,27 @@ import java.util.Locale;
 import java.util.StringJoiner;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NativeLibraryLoader {
+    public static final String LIBRARY_PATH_PROPERTY = "jdave.library.path";
+
+    private static final Logger log = LoggerFactory.getLogger(NativeLibraryLoader.class);
+
+    /**
+     * Returns the path to a local libdave binary, if set.
+     *
+     * <p>Uses {@link #LIBRARY_PATH_PROPERTY} to determine the path from system properties.
+     * If the property is not set, this method returns null.
+     *
+     * @return The path to a local libdave binary, or null if not set.
+     */
+    @Nullable
+    public static String getLibraryPath() {
+        return System.getProperty(LIBRARY_PATH_PROPERTY);
+    }
+
     @NonNull
     public static NativeLibrary getNativeLibrary() {
         return resolveLibrary("dave");
@@ -46,6 +65,11 @@ public class NativeLibraryLoader {
 
     @NonNull
     public static SymbolLookup getSymbolLookup() {
+        String customLibraryPath = getLibraryPath();
+        if (customLibraryPath != null) {
+            return getSymbolLookupFromPath(customLibraryPath);
+        }
+
         Path tempFile = createTemporaryFile();
         return SymbolLookup.libraryLookup(tempFile, Arena.global());
     }
@@ -66,6 +90,23 @@ public class NativeLibraryLoader {
 
         Architecture arch = getArchitecture(archName);
         return new NativeLibrary(os, arch, baseName);
+    }
+
+    @NonNull
+    private static SymbolLookup getSymbolLookupFromPath(@NonNull String customLibraryPath) {
+        Path path = Path.of(customLibraryPath).toAbsolutePath();
+        log.debug("Loading library from custom path: {}", path);
+        if (!Files.exists(path)) {
+            throw new IllegalStateException("Could not find library at path: " + path);
+        }
+        if (!Files.isRegularFile(path)) {
+            throw new IllegalStateException("Path is not a regular file: " + path);
+        }
+        if (!Files.isReadable(path)) {
+            throw new IllegalStateException("Path is not readable: " + path);
+        }
+
+        return SymbolLookup.libraryLookup(path, Arena.global());
     }
 
     @NonNull

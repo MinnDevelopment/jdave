@@ -53,6 +53,11 @@ dependencies {
 }
 ```
 
+> [!NOTE]
+> ### Alternative: Custom Native Library
+> 
+> You can bring your own `libdave` binary by using `-Djdave.library.path=/path/to/libdave.so` as a JVM argument or setting it using `System.setProperty(NativeLibraryLoader.LIBRARY_PATH_PROPERTY, path)` before loading the `LibDave` class.
+
 ## Example: JDA
 
 To use this library with [JDA](https://github.com/discord-jda/JDA), you can use the [JDaveSessionFactory](api/src/main/java/club/minnced/discord/jdave/interop/JDaveSessionFactory.java) to configure the audio module:

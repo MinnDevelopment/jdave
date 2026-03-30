@@ -11,7 +11,10 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import org.jspecify.annotations.NonNull;
 
+@SuppressWarnings("restricted")
 public class LibDaveSessionBinding {
+    private LibDaveSessionBinding() {}
+
     static final MethodHandle daveSessionCreate;
     static final MethodHandle daveSessionDestroy;
     static final MethodHandle daveSessionInit;

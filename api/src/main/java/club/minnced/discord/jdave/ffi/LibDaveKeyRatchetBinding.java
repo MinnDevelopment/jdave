@@ -8,6 +8,8 @@ import java.lang.invoke.MethodHandle;
 import org.jspecify.annotations.NonNull;
 
 public class LibDaveKeyRatchetBinding {
+    private LibDaveKeyRatchetBinding() {}
+
     private static final MethodHandle destroyKeyRatchet;
 
     static {

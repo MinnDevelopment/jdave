@@ -7,7 +7,10 @@ import java.lang.foreign.MemoryLayout;
 import java.lang.foreign.SymbolLookup;
 import java.lang.invoke.MethodHandle;
 
+@SuppressWarnings("restricted")
 public class LibDaveLookup {
+    private LibDaveLookup() {}
+
     static final Linker LINKER = Linker.nativeLinker();
     static final SymbolLookup SYMBOL_LOOKUP;
     public static final MemoryLayout C_SIZE;

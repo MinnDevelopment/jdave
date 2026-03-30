@@ -6,6 +6,8 @@ import net.dv8tion.jda.api.audio.dave.DaveSessionFactory;
 import org.jspecify.annotations.NonNull;
 
 public class JDaveSessionFactory implements DaveSessionFactory {
+    public JDaveSessionFactory() {}
+
     @NonNull
     @Override
     public DaveSession createDaveSession(@NonNull DaveProtocolCallbacks callbacks, long userId, long channelId) {

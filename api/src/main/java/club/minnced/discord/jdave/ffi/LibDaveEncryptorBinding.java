@@ -8,7 +8,10 @@ import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import org.jspecify.annotations.NonNull;
 
+@SuppressWarnings("restricted")
 public class LibDaveEncryptorBinding {
+    private LibDaveEncryptorBinding() {}
+
     static final MethodHandle daveEncryptorCreate;
     static final MethodHandle daveEncryptorDestroy;
     static final MethodHandle daveEncryptorSetKeyRatchet;

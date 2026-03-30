@@ -62,6 +62,7 @@ public class LibDave {
         }
     }
 
+    @SuppressWarnings("restricted")
     public static void setLogSinkCallback(@NonNull Arena arena, @NonNull LogSinkCallback logSinkCallback) {
         LogSinkCallbackMapper upcallMapper = new LogSinkCallbackMapper(logSinkCallback);
 

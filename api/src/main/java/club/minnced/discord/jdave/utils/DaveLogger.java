@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
 public class DaveLogger {
+    private DaveLogger() {}
+
     @SuppressWarnings("LoggerInitializedWithForeignClass")
     public static final Logger log = LoggerFactory.getLogger(LibDave.class);
 

@@ -80,16 +80,34 @@ WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers i
 WARNING: Restricted methods will be blocked in a future release unless native access is enabled
 ```
 
-To remove these warnings, you need to either allow these methods through the command line arguments:
+To remove these warnings, you need to allow native access for the module that calls the restricted methods.
+
+### Unnamed modules (classpath)
+
+If you are running jdave on the classpath (no `module-info.java`), use:
 
 ```shell
 java --enable-native-access=ALL-UNNAMED ...
 ```
 
-Or enabling them in your JAR-file manifest:
+Or in your JAR-file manifest:
+
+```
+Enable-Native-Access: ALL-UNNAMED
+```
+
+### Named modules (module path)
+
+If your application uses JPMS modules, specify the jdave module name instead:
 
 ```shell
-Enable-Native-Access: ALL-UNNAMED
+java --enable-native-access=club.minnced.discord.jdave ...
+```
+
+Or in your JAR-file manifest:
+
+```
+Enable-Native-Access: club.minnced.discord.jdave
 ```
 
 ## Why Java 25?

@@ -26,8 +26,9 @@ subprojects {
     }
 
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
 
         withJavadocJar()
         withSourcesJar()
@@ -35,8 +36,7 @@ subprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
-        options.release = 25
 
-        options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-options", "-Xlint:-restricted"))
+        options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-options", "-Xlint:-exports", "-Xlint:-requires-transitive-automatic", "-Xlint:-requires-automatic"))
     }
 }

@@ -7,7 +7,10 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public class NativeUtils {
+    private NativeUtils() {}
+
     @NonNull
+    @SuppressWarnings("restricted")
     public static String asJavaString(@NonNull MemorySegment nullTerminatedString) {
         return nullTerminatedString.reinterpret(1024 * 64).getString(0);
     }

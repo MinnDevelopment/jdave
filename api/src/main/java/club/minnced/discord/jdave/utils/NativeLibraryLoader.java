@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NativeLibraryLoader {
+    private NativeLibraryLoader() {}
+
     public static final String LIBRARY_PATH_PROPERTY = "jdave.library.path";
 
     private static final Logger log = LoggerFactory.getLogger(NativeLibraryLoader.class);
@@ -41,7 +43,8 @@ public class NativeLibraryLoader {
     public static Path createTemporaryFile() {
         NativeLibrary nativeLibrary = getNativeLibrary();
 
-        try (InputStream library = NativeLibraryLoader.class.getResourceAsStream(nativeLibrary.resourcePath())) {
+        String resourceName = nativeLibrary.resourcePath().substring(1); // strip leading /
+        try (InputStream library = NativeLibraryLoader.class.getResourceAsStream(resourceName)) {
             if (library == null) {
                 throw new LibDaveBindingException(
                         "Could not find resource for current platform. Looked for " + nativeLibrary.resourcePath());
@@ -63,6 +66,7 @@ public class NativeLibraryLoader {
         }
     }
 
+    @SuppressWarnings("restricted")
     @NonNull
     public static SymbolLookup getSymbolLookup() {
         String customLibraryPath = getLibraryPath();
@@ -92,6 +96,7 @@ public class NativeLibraryLoader {
         return new NativeLibrary(os, arch, baseName);
     }
 
+    @SuppressWarnings("restricted")
     @NonNull
     private static SymbolLookup getSymbolLookupFromPath(@NonNull String customLibraryPath) {
         Path path = Path.of(customLibraryPath).toAbsolutePath();

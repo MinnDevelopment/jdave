@@ -9,7 +9,9 @@ import java.lang.foreign.MemorySegment;
 import java.lang.invoke.MethodHandle;
 import org.jspecify.annotations.NonNull;
 
+@SuppressWarnings("restricted")
 public class LibDaveDecryptorBinding {
+    private LibDaveDecryptorBinding() {}
 
     static final MethodHandle daveDecryptorCreate;
     static final MethodHandle daveDecryptorDestroy;
